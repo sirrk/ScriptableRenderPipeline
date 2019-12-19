@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 
+
 public static class SetupProject
 {
     public static void ApplySettings()
@@ -33,3 +34,23 @@ public static class SetupProject
         PlayerSettings.SetGraphicsAPIs(currentTarget, new [] { api } );
     }
 }
+
+#if UNITY_ANDROID
+[InitializeOnLoad]
+public class SetAndroidSdk
+{
+    static SetAndroidSdk()
+    {
+        string sdkPath = Environment.GetEnvironmentVariable("ANDROID_SDK_ROOT");
+        if(sdkPath != string.Empty)
+        {
+            UnityEditor.Android.AndroidExternalToolsSettings.sdkRootPath = sdkPath;
+            Debug.Log($"SDK Path was set from ANDROID_SDK_ROOT = {sdkPath}");
+        }
+        else
+        {
+            Debug.LogWarning($"ANDROID_SDK_ROOT was not set.\nCurrently using SDK from here: {UnityEditor.Android.AndroidExternalToolsSettings.sdkRootPath}");
+        }
+    }
+}
+#endif
