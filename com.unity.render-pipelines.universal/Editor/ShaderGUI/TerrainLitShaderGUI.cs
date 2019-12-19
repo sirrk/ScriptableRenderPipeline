@@ -10,6 +10,14 @@ namespace UnityEditor.Rendering.Universal
     {
         private class StylesLayer
         {
+            public readonly GUIContent warningHeightBasedBlending = new GUIContent("WARNING : Height-based blending will not work properly with more than four TerrainLayer materials!");
+
+            public readonly GUIStyle warnStyle = new GUIStyle(GUI.skin.label)
+            {
+                fontStyle = FontStyle.BoldAndItalic,
+                wordWrap = true
+            };
+
             public readonly GUIContent enableHeightBlend = new GUIContent("Enable Height-based Blend", "Blend terrain layers based on height values.");
             public readonly GUIContent heightTransition = new GUIContent("Height Transition", "Size in world units of the smooth transition between layers.");
             public readonly GUIContent enableInstancedPerPixelNormal = new GUIContent("Enable Per-pixel Normal", "Enable per-pixel normal when the terrain uses instanced rendering.");
@@ -110,29 +118,36 @@ namespace UnityEditor.Rendering.Universal
             bool optionsChanged = false;
             EditorGUI.BeginChangeCheck();
             {
-                bool canUseHeightBlend = true;
-                if (numLayers != null) { canUseHeightBlend = (numLayers.floatValue <= 4); }
-                if (enableHeightBlend != null && canUseHeightBlend)
+                if (enableHeightBlend != null)
                 {
-                    EditorGUI.indentLevel++;
-                    materialEditorIn.ShaderProperty(enableHeightBlend, styles.enableHeightBlend);
-                    if (enableHeightBlend.floatValue > 0)
+                    bool canUseHeightBlend = true;
+                    if (numLayers != null)
+                    {
+                        canUseHeightBlend = (numLayers.floatValue <= 4);
+                    }
+
+                    if (canUseHeightBlend)
                     {
                         EditorGUI.indentLevel++;
-                        materialEditorIn.ShaderProperty(heightTransition, styles.heightTransition);
+                        materialEditorIn.ShaderProperty(enableHeightBlend, styles.enableHeightBlend);
+                        if (enableHeightBlend.floatValue > 0)
+                        {
+                            EditorGUI.indentLevel++;
+                            materialEditorIn.ShaderProperty(heightTransition, styles.heightTransition);
+                            EditorGUI.indentLevel--;
+                        }
                         EditorGUI.indentLevel--;
                     }
-                    EditorGUI.indentLevel--;
-                }
-                else if (enableHeightBlend != null && !canUseHeightBlend)
-                {
-                    // Setting to zero will ensure that it's disabled in the shader
-                    // Make sure we update the shader state to reflect this (though that's
-                    // only necessary if we started out with it enabled).
-                    GUIStyle warnStyle = new GUIStyle(GUI.skin.label);
-                    warnStyle.fontStyle = FontStyle.BoldAndItalic;
-                    warnStyle.wordWrap = true;
-                    GUILayout.Label("WARNING : Height-based blending will not work properly with high layer counts!", warnStyle);
+                    else
+                    {
+                        // Setting to zero will ensure that it's disabled in the shader
+                        // Make sure we update the shader state to reflect this (though that's
+                        // only necessary if we started out with it enabled).
+                        enableHeightBlend.floatValue = 0.0f;
+                        optionsChanged = true;
+
+                        GUILayout.Label(styles.warningHeightBasedBlending, styles.warnStyle);
+                    }
                 }
 
                 EditorGUILayout.Space();
