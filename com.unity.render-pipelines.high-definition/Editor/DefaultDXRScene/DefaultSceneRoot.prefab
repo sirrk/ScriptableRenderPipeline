@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8289963443785841669}
   m_Layer: 0
-  m_Name: Root
+  m_Name: DefaultSceneRoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -269,7 +269,7 @@ MonoBehaviour:
   priority: 0
   blendDistance: 0
   weight: 1
-  sharedProfile: {fileID: 11400000, guid: 806376545fc9e0e46983958f4deb8d44, type: 2}
+  sharedProfile: {fileID: 11400000, guid: 73cea6d63cb641c4cb7d7a199da608e5, type: 2}
 --- !u!1 &7763395797165557198
 GameObject:
   m_ObjectHideFlags: 0
@@ -317,7 +317,7 @@ MonoBehaviour:
   priority: 0
   blendDistance: 0
   weight: 1
-  sharedProfile: {fileID: 11400000, guid: 73b73e19336abb64aacdd1917a7ae32a, type: 2}
+  sharedProfile: {fileID: 11400000, guid: a9d48ab5a6d6cb14abb819b5b4a31662, type: 2}
 --- !u!1 &7763395797332947436
 GameObject:
   m_ObjectHideFlags: 0
@@ -466,7 +466,7 @@ MonoBehaviour:
   m_UseRayTracedShadows: 1
   m_NumRayTracingSamples: 4
   m_FilterTracedShadow: 1
-  m_FilterSizeTraced: 16
+  m_FilterSizeTraced: 3
   m_SunLightConeAngle: 0.5
   m_LightShadowRadius: 0.5
   m_ColorShadow: 1
@@ -486,7 +486,7 @@ MonoBehaviour:
   m_ShadowResolution:
     m_Override: 512
     m_UseOverride: 0
-    m_Level: 2
+    m_Level: 1
   m_ShadowDimmer: 1
   m_VolumetricShadowDimmer: 1
   m_ShadowFadeDistance: 10000
