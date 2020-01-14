@@ -48,7 +48,7 @@ namespace UnityEngine.Rendering.Universal.Internal
         public override void Configure(CommandBuffer cmd, RenderTextureDescriptor cameraTextureDescriptor)
         {
             cmd.GetTemporaryRT(depthAttachmentHandle.id, descriptor, FilterMode.Point);
-            ConfigureTarget(depthAttachmentHandle.Identifier());
+            ConfigureTarget(depthAttachmentHandle.Identifier(), descriptor.dimension);
             ConfigureClear(ClearFlag.All, Color.black);
         }
 
@@ -64,13 +64,6 @@ namespace UnityEngine.Rendering.Universal.Internal
                 var sortFlags = renderingData.cameraData.defaultOpaqueSortFlags;
                 var drawSettings = CreateDrawingSettings(m_ShaderTagId, ref renderingData, sortFlags);
                 drawSettings.perObjectData = PerObjectData.None;
-
-                ref CameraData cameraData = ref renderingData.cameraData;
-                Camera camera = cameraData.camera;
-                if (cameraData.isStereoEnabled)
-                {
-                    context.StartMultiEye(camera, eyeIndex);
-                }
 
                 context.DrawRenderers(renderingData.cullResults, ref drawSettings, ref m_FilteringSettings);
 

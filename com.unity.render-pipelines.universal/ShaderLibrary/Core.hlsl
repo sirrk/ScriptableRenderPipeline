@@ -246,24 +246,7 @@ half3 MixFog(real3 fragColor, real fogFactor)
 
 #endif
 
-#if defined(UNITY_SINGLE_PASS_STEREO)
-float2 TransformStereoScreenSpaceTex(float2 uv, float w)
-{
-    // TODO: RVS support can be added here, if Universal decides to support it
-    float4 scaleOffset = unity_StereoScaleOffset[unity_StereoEyeIndex];
-    return uv.xy * scaleOffset.xy + scaleOffset.zw * w;
-}
-
-float2 UnityStereoTransformScreenSpaceTex(float2 uv)
-{
-    return TransformStereoScreenSpaceTex(saturate(uv), 1.0);
-}
-
-#else
-
 #define UnityStereoTransformScreenSpaceTex(uv) uv
-
-#endif // defined(UNITY_SINGLE_PASS_STEREO)
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Deprecated.hlsl"
 

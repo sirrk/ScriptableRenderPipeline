@@ -54,40 +54,45 @@ namespace UnityEngine.Rendering.Universal.Internal
             // Note: We need to get the cameraData.targetTexture as this will get the targetTexture of the camera stack.
             // Overlay cameras need to output to the target described in the base camera while doing camera stack.
             ref CameraData cameraData = ref renderingData.cameraData;
-            RenderTargetIdentifier cameraTarget = (cameraData.targetTexture != null) ? new RenderTargetIdentifier(cameraData.targetTexture) : BuiltinRenderTextureType.CameraTarget;
 
-            // Use default blit for XR as we are not sure the UniversalRP blit handles stereo.
-            // The blit will be reworked for stereo along the XRSDK work.
-            Material blitMaterial = (cameraData.isStereoEnabled) ? null : m_BlitMaterial;
-            cmd.SetGlobalTexture("_BlitTex", m_Source.Identifier());
-            if (cameraData.isStereoEnabled || cameraData.isSceneViewCamera || cameraData.isDefaultViewport)
-            {
-                // This set render target is necessary so we change the LOAD state to DontCare.
-                cmd.SetRenderTarget(BuiltinRenderTextureType.CameraTarget,
-                    RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store,     // color
-                    RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare); // depth
-                cmd.Blit(m_Source.Identifier(), cameraTarget, blitMaterial);
-            }
-            else
+            if (!cameraData.xrPass.hasMultiXrView)
             {
                 // TODO: Final blit pass should always blit to backbuffer. The first time we do we don't need to Load contents to tile.
                 // We need to keep in the pipeline of first render pass to each render target to propertly set load/store actions.
                 // meanwhile we set to load so split screen case works.
-                SetRenderTarget(
-                    cmd,
-                    cameraTarget,
-                    RenderBufferLoadAction.Load,
-                    RenderBufferStoreAction.Store,
-                    ClearFlag.None,
-                    Color.black,
-                    m_TargetDimension);
+                if (m_TargetDimension == TextureDimension.Tex2DArray)
+                    CoreUtils.SetRenderTarget(cmd, cameraData.xrPass.renderTarget, ClearFlag.None, Color.black, 0, CubemapFace.Unknown, cameraData.xrPass.GetTextureArraySlice(0));
+                else
+                    CoreUtils.SetRenderTarget(cmd, cameraData.xrPass.renderTarget, RenderBufferLoadAction.Load, RenderBufferStoreAction.Store, ClearFlag.None, Color.black);
+                cmd.SetViewport(cameraData.xrPass.GetViewport(0));
 
-                Camera camera = cameraData.camera;
-                cmd.SetViewProjectionMatrices(Matrix4x4.identity, Matrix4x4.identity);
-                cmd.SetViewport(cameraData.pixelRect);
-                cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, blitMaterial);
-                cmd.SetViewProjectionMatrices(camera.worldToCameraMatrix, camera.projectionMatrix);
+                Matrix4x4 projMatrix = GL.GetGPUProjectionMatrix(Matrix4x4.identity, cameraData.xrPass.renderTargetIsRenderTexture);
+                RenderingUtils.SetViewProjectionMatrices(cmd, Matrix4x4.identity, projMatrix, true);
             }
+            else
+            {
+                CoreUtils.SetRenderTarget(cmd, cameraData.xrPass.renderTarget, ClearFlag.None, Color.black, 0, CubemapFace.Unknown, -1);
+                cmd.SetViewport(cameraData.xrPass.GetViewport(0));
+
+                // XRTODO: this is blit shader, we use projection matrix to handle y flip. no need to passing stereo projection matrix here. just pass 1 proj is good enough
+                // XRTODO: replace this with full screen quad. And handle y flip without drawing quad geometry.
+                Matrix4x4[] stereoProjectionMatrix = new Matrix4x4[2];
+                Matrix4x4[] stereoViewMatrix = new Matrix4x4[2];
+                for (int i = 0; i < 2; i++)
+                {
+                    stereoViewMatrix[i] = Matrix4x4.identity;
+                    stereoProjectionMatrix[i] = GL.GetGPUProjectionMatrix(Matrix4x4.identity, cameraData.xrPass.renderTargetIsRenderTexture);
+                }
+
+                RenderingUtils.SetStereoViewProjectionMatrices(cmd, stereoViewMatrix, stereoProjectionMatrix, true);
+            }
+
+            cmd.SetGlobalTexture("_BlitTex", m_Source.Identifier());
+
+
+            cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, m_BlitMaterial);
+            RenderingUtils.SetViewProjectionMatrices(cmd, cameraData.camera.worldToCameraMatrix,
+                GL.GetGPUProjectionMatrix(cameraData.camera.projectionMatrix, cameraData.xrPass.renderTargetIsRenderTexture), true);
 
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);

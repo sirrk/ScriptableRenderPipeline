@@ -49,6 +49,8 @@ namespace UnityEngine.Rendering.Universal
         const string k_RenderCameraTag = "Render Camera";
         static ProfilingSampler _CameraProfilingSampler = new ProfilingSampler(k_RenderCameraTag);
 
+        public static XRSystem m_XRSystem = new XRSystem();
+
         public static float maxShadowBias
         {
             get => 10.0f;
@@ -221,6 +223,21 @@ namespace UnityEngine.Rendering.Universal
             RenderSingleCamera(context, cameraData, true);
         }
 
+        static bool TryGetCullingParameters(CameraData cameraData, out ScriptableCullingParameters cullingParams)
+        {
+            if (cameraData.xrPass.enabled)
+            {
+                cullingParams = cameraData.xrPass.cullingParams;
+                return true;
+            }
+            else
+            {
+                if (!cameraData.camera.TryGetCullingParameters(cameraData.camera.stereoEnabled, out cullingParams))
+                    return false;
+            }
+            return true;
+        }
+
         /// <summary>
         /// Renders a single camera. This method will do culling, setup and execution of the renderer.
         /// </summary>
@@ -237,20 +254,25 @@ namespace UnityEngine.Rendering.Universal
                 return;
             }
 
-            if (!camera.TryGetCullingParameters(IsStereoEnabled(camera), out var cullingParameters))
-                return;
-
-            SetupPerCameraShaderConstants(cameraData);
-
             string tag = (asset.debugLevel >= PipelineDebugLevel.Profiling) ? camera.name: k_RenderCameraTag;
             CommandBuffer cmd = CommandBufferPool.Get(tag);
-            using (new ProfilingScope(cmd, _CameraProfilingSampler))
+            var xrPasses = m_XRSystem.SetupFrame(cameraData, /*XRTODO XR single pass settings in urp asset pipeline*/ true, /*XRTODO: test mode*/ false);
+            foreach (XRPass xrPass in xrPasses)
             {
-                renderer.Clear();
-                renderer.SetupCullingParameters(ref cullingParameters, ref cameraData);
+                cameraData.xrPass = xrPass;
 
-                context.ExecuteCommandBuffer(cmd);
-                cmd.Clear();
+                if (!TryGetCullingParameters(cameraData, out var cullingParameters))
+                    return;
+
+                SetupPerCameraShaderConstants(cameraData);
+
+                using (new ProfilingScope(cmd, _CameraProfilingSampler))
+                {
+                    renderer.Clear();
+                    renderer.SetupCullingParameters(ref cullingParameters, ref cameraData);
+
+                    context.ExecuteCommandBuffer(cmd);
+                    cmd.Clear();
 
 #if UNITY_EDITOR
 
@@ -259,17 +281,28 @@ namespace UnityEngine.Rendering.Universal
                     ScriptableRenderContext.EmitWorldGeometryForSceneView(camera);
 #endif
 
-                var cullResults = context.Cull(ref cullingParameters);
-                InitializeRenderingData(asset, ref cameraData, ref cullResults, requiresBlitToBackbuffer, out var renderingData);
+                    var cullResults = context.Cull(ref cullingParameters);
+                    InitializeRenderingData(asset, ref cameraData, ref cullResults, requiresBlitToBackbuffer, out var renderingData);
 
-                renderer.Setup(context, ref renderingData);
+                    renderer.Setup(context, ref renderingData);
 
-                renderer.Execute(context, ref renderingData);
+                    renderer.Execute(context, ref renderingData);
+                }
+            }
+
+            // Render XR mirror view once all xr passes have been completed
+            if (cameraData.camera.cameraType == CameraType.Game && requiresBlitToBackbuffer)
+            {
+                cmd.Clear();
+                m_XRSystem.RenderMirrorView(cmd);
+                context.ExecuteCommandBuffer(cmd);
             }
 
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);
             context.Submit();
+
+            m_XRSystem.ReleaseFrame();
         }
 
         /// <summary>
@@ -407,28 +440,12 @@ namespace UnityEngine.Rendering.Universal
         {
             var settings = asset;
             cameraData.targetTexture = baseCamera.targetTexture;
-            cameraData.isStereoEnabled = IsStereoEnabled(baseCamera);
-            if (cameraData.isStereoEnabled)
-            {
-                // XRTODO: Enable pure mode for XR
-                URPCameraMode.isPureURP = false;
-            }
-            else
+
+            //XRTODO: default pure on
             {
                 URPCameraMode.isPureURP = true;
             }
             cameraData.isSceneViewCamera = baseCamera.cameraType == CameraType.SceneView;
-
-            cameraData.numberOfXRPasses = 1;
-            cameraData.isXRMultipass = false;
-
-#if ENABLE_VR && ENABLE_VR_MODULE
-            if (cameraData.isStereoEnabled && !cameraData.isSceneViewCamera && XR.XRSettings.stereoRenderingMode == XR.XRSettings.StereoRenderingMode.MultiPass)
-            {
-                cameraData.numberOfXRPasses = 2;
-                cameraData.isXRMultipass = true;
-            }
-#endif
 
             ///////////////////////////////////////////////////////////////////
             // Environment and Post-processing settings                       /
@@ -499,7 +516,7 @@ namespace UnityEngine.Rendering.Universal
 
             bool needsAlphaChannel = Graphics.preserveFramebufferAlpha;
             cameraData.cameraTargetDescriptor = CreateRenderTextureDescriptor(baseCamera, cameraData.renderScale,
-                cameraData.isStereoEnabled, cameraData.isHdrEnabled, msaaSamples, needsAlphaChannel);
+                cameraData.isHdrEnabled, msaaSamples, needsAlphaChannel);
         }
 
         /// <summary>

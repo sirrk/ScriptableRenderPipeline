@@ -51,7 +51,6 @@ namespace UnityEngine.Rendering.Universal.Internal
                 return;
 
             ref Camera camera = ref renderingData.cameraData.camera;
-            bool stereo = renderingData.cameraData.isStereoEnabled;
 
             CommandBuffer cmd = CommandBufferPool.Get(m_ProfilerTag);
             if (URPCameraMode.isPureURP)
@@ -65,17 +64,10 @@ namespace UnityEngine.Rendering.Universal.Internal
             }
             else
             {
-                if (!stereo)
                 {
                     cmd.SetViewProjectionMatrices(Matrix4x4.identity, Matrix4x4.identity);
                     cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, m_ScreenSpaceShadowsMaterial);
                     cmd.SetViewProjectionMatrices(camera.worldToCameraMatrix, camera.projectionMatrix);
-                }
-                else
-                {
-                    // Avoid setting and restoring camera view and projection matrices when in stereo.
-                    RenderTargetIdentifier screenSpaceOcclusionTexture = m_ScreenSpaceShadowmap.Identifier();
-                    Blit(cmd, screenSpaceOcclusionTexture, screenSpaceOcclusionTexture, m_ScreenSpaceShadowsMaterial);
                 }
             }
 

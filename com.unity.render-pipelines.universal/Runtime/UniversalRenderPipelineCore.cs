@@ -63,9 +63,7 @@ namespace UnityEngine.Rendering.Universal
 
         public SortingCriteria defaultOpaqueSortFlags;
 
-        public bool isStereoEnabled;
-        internal int numberOfXRPasses;
-        internal bool isXRMultipass;
+        internal XRPass xrPass;
 
         public float maxShadowDistance;
         public bool postProcessEnabled;
@@ -213,21 +211,12 @@ namespace UnityEngine.Rendering.Universal
         }
 
         static RenderTextureDescriptor CreateRenderTextureDescriptor(Camera camera, float renderScale,
-            bool isStereoEnabled, bool isHdrEnabled, int msaaSamples, bool needsAlpha)
+            bool isHdrEnabled, int msaaSamples, bool needsAlpha)
         {
             RenderTextureDescriptor desc;
             RenderTextureFormat renderTextureFormatDefault = RenderTextureFormat.Default;
 
-            // NB: There's a weird case about XR and render texture
-            // In test framework currently we render stereo tests to target texture
-            // The descriptor in that case needs to be initialized from XR eyeTexture not render texture
-            // Otherwise current tests will fail. Check: Do we need to update the test images instead?
-            if (isStereoEnabled)
-            {
-                desc = XRGraphics.eyeTextureDesc;
-                renderTextureFormatDefault = desc.colorFormat;
-            }
-            else if (camera.targetTexture == null)
+            if (camera.targetTexture == null)
             {
                 desc = new RenderTextureDescriptor(camera.pixelWidth, camera.pixelHeight);
                 desc.width = (int)((float)desc.width * renderScale);

@@ -56,7 +56,6 @@ namespace UnityEngine.Rendering.Universal.Internal
         RenderTargetIdentifier[] m_MRT2;
         Vector4[] m_BokehKernel;
         int m_BokehHash;
-        bool m_IsStereo;
 
         // True when this is the very last pass in the pipeline
         bool m_IsFinalPass;
@@ -217,7 +216,6 @@ namespace UnityEngine.Rendering.Universal.Internal
         void Render(CommandBuffer cmd, ref RenderingData renderingData)
         {
             ref var cameraData = ref renderingData.cameraData;
-            m_IsStereo = renderingData.cameraData.isStereoEnabled;
 
             // Don't use these directly unless you have a good reason to, use GetSource() and
             // GetDestination() instead
@@ -388,11 +386,6 @@ namespace UnityEngine.Rendering.Universal.Internal
                 }
                 else
                 {
-                    if (m_IsStereo)
-                    {
-                        Blit(cmd, GetSource(), BuiltinRenderTextureType.CurrentActive, m_Materials.uber);
-                    }
-                    else
                     {
                         cmd.SetViewProjectionMatrices(Matrix4x4.identity, Matrix4x4.identity);
                         if (m_Destination == RenderTargetHandle.CameraTarget)
@@ -1130,9 +1123,6 @@ namespace UnityEngine.Rendering.Universal.Internal
             var center = m_Vignette.center.value;
             var aspectRatio = m_Descriptor.width / (float)m_Descriptor.height;
 
-            if (m_IsStereo && XRGraphics.stereoRenderingMode == XRGraphics.StereoRenderingMode.SinglePass)
-                aspectRatio *= 0.5f;
-
             var v1 = new Vector4(
                 color.r, color.g, color.b,
                 m_Vignette.rounded.value ? aspectRatio : 1f
@@ -1264,11 +1254,7 @@ namespace UnityEngine.Rendering.Universal.Internal
             else
             {
                 cmd.SetViewProjectionMatrices(cameraData.camera.worldToCameraMatrix, cameraData.camera.projectionMatrix);
-                if (cameraData.isStereoEnabled)
-                {
-                    Blit(cmd, m_Source.Identifier(), BuiltinRenderTextureType.CurrentActive, material);
-                }
-                else
+
                 {
                     cmd.SetViewProjectionMatrices(Matrix4x4.identity, Matrix4x4.identity);
                     cmd.SetViewport(cameraData.pixelRect);

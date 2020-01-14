@@ -11,8 +11,13 @@
     #define UNITY_STEREO_MULTIVIEW_ENABLED
 #endif
 
-#if defined(UNITY_SINGLE_PASS_STEREO) || defined(UNITY_STEREO_INSTANCING_ENABLED) || defined(UNITY_STEREO_MULTIVIEW_ENABLED)
+#if defined(UNITY_STEREO_INSTANCING_ENABLED) || defined(UNITY_STEREO_MULTIVIEW_ENABLED)
 #define USING_STEREO_MATRICES
+#endif
+
+#if defined(UNITY_SINGLE_PASS_STEREO)
+// XRTODO: enable this error message! 
+//#error Single-pass (double-wide) is not compatible with URP.
 #endif
 
 #if defined(USING_STEREO_MATRICES)
@@ -121,16 +126,8 @@ real4 unity_SHBb;
 real4 unity_SHC;
 CBUFFER_END
 
-#if defined(UNITY_STEREO_MULTIVIEW_ENABLED) || ((defined(UNITY_SINGLE_PASS_STEREO) || defined(UNITY_STEREO_INSTANCING_ENABLED)) && (defined(SHADER_API_GLCORE) || defined(SHADER_API_GLES3) || defined(SHADER_API_METAL) || defined(SHADER_API_VULKAN)))
-    #define GLOBAL_CBUFFER_START(name)    cbuffer name {
-    #define GLOBAL_CBUFFER_END            }
-#else
-    #define GLOBAL_CBUFFER_START(name)    CBUFFER_START(name)
-    #define GLOBAL_CBUFFER_END            CBUFFER_END
-#endif
-
 #if defined(USING_STEREO_MATRICES)
-GLOBAL_CBUFFER_START(UnityStereoGlobals)
+CBUFFER_START(UnityStereoViewBuffer)
 float4x4 unity_StereoMatrixP[2];
 float4x4 unity_StereoMatrixV[2];
 float4x4 unity_StereoMatrixInvV[2];
@@ -143,20 +140,20 @@ float4x4 unity_StereoCameraToWorld[2];
 
 float3 unity_StereoWorldSpaceCameraPos[2];
 float4 unity_StereoScaleOffset[2];
-GLOBAL_CBUFFER_END
+CBUFFER_END
 #endif
 
-#if defined(USING_STEREO_MATRICES) && defined(UNITY_STEREO_MULTIVIEW_ENABLED)
-GLOBAL_CBUFFER_START(UnityStereoEyeIndices)
-    float4 unity_StereoEyeIndices[2];
-GLOBAL_CBUFFER_END
-#endif
+//#if defined(USING_STEREO_MATRICES) && defined(UNITY_STEREO_MULTIVIEW_ENABLED)
+//CBUFFER_START(UnityStereoEyeIndices)
+//    float4 unity_StereoEyeIndices[2];
+//CBUFFER_END
+//#endif
 
 #if defined(UNITY_STEREO_MULTIVIEW_ENABLED) && defined(SHADER_STAGE_VERTEX)
 // OVR_multiview
 // In order to convey this info over the DX compiler, we wrap it into a cbuffer.
 #if !defined(UNITY_DECLARE_MULTIVIEW)
-#define UNITY_DECLARE_MULTIVIEW(number_of_views) GLOBAL_CBUFFER_START(OVR_multiview) uint gl_ViewID; uint numViews_##number_of_views; GLOBAL_CBUFFER_END
+#define UNITY_DECLARE_MULTIVIEW(number_of_views) CBUFFER_START(OVR_multiview) uint gl_ViewID; uint numViews_##number_of_views; CBUFFER_END
 #define UNITY_VIEWID gl_ViewID
 #endif
 #endif
@@ -166,10 +163,6 @@ GLOBAL_CBUFFER_END
 UNITY_DECLARE_MULTIVIEW(2);
 #elif defined(UNITY_STEREO_INSTANCING_ENABLED) || defined(UNITY_STEREO_MULTIVIEW_ENABLED)
 static uint unity_StereoEyeIndex;
-#elif defined(UNITY_SINGLE_PASS_STEREO)
-GLOBAL_CBUFFER_START(UnityStereoEyeIndex)
-int unity_StereoEyeIndex;
-GLOBAL_CBUFFER_END
 #endif
 
 float4x4 glstate_matrix_transpose_modelview0;
