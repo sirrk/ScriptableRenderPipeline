@@ -89,13 +89,94 @@ class VFXExternalShaderProcessor : AssetPostprocessor
         }
     }
 
+
+    static Dictionary<string,List<string>> dependantAssetCache;
+
+
+    static public void RecompileDependencies(VisualEffectObject visualEffectObject)
+    {
+        if( dependantAssetCache == null)
+        {
+            dependantAssetCache = new Dictionary<string, List<string>>();
+            //building cache
+            foreach (var graph in VFXGraph.GetAllGraphs<VisualEffectAsset>())
+            {
+                if( graph != null)
+                {
+                    foreach(var dep in graph.subgraphDependencies)
+                    {
+                        List<string> dependencyList;
+
+                        string dependantGUID = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(dep));
+                        if( ! dependantAssetCache.TryGetValue(AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(dep)), out dependencyList))
+                        {
+                            dependencyList = new List<string>();
+                            dependantAssetCache[dependantGUID] = dependencyList;
+                        }
+                        dependencyList.Add(AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(graph)));
+                    }
+                }
+            }
+        }
+
+
+        {
+            List<string> dependencyList;
+            if( dependantAssetCache.TryGetValue(AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(visualEffectObject)),out dependencyList))
+            {
+                foreach(var dep in dependencyList.ToList())
+                {
+                    var resource = VisualEffectResource.GetResourceAtPath(AssetDatabase.GUIDToAssetPath(dep));
+                    if( resource != null)
+                    {
+                        resource.GetOrCreateGraph().SubgraphDirty(visualEffectObject);
+                    }
+                }
+            }
+        }
+    }
+
     static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
     {
         foreach (var assetPath in deletedAssets)
         {
             if (VisualEffectAssetModicationProcessor.HasVFXExtension(assetPath))
             {
+                if( dependantAssetCache != null)
+                    dependantAssetCache.Remove(AssetDatabase.AssetPathToGUID(assetPath));
                 VisualEffectResource.DeleteAtPath(assetPath);
+            }
+        }
+        if( dependantAssetCache != null)
+        {
+            foreach (string assetPath in importedAssets)
+            {
+                if (assetPath.EndsWith(VisualEffectResource.Extension))
+                {
+                    string assetGUID = AssetDatabase.AssetPathToGUID(assetPath);
+
+                    foreach (var list in dependantAssetCache.Values)
+                        if( list.Contains(assetGUID))
+                            list.Remove(assetGUID);
+
+                    VisualEffectResource resource = VisualEffectResource.GetResourceAtPath(assetPath);
+                    if( resource != null)
+                    {
+                        foreach(var dep in resource.GetOrCreateGraph().subgraphDependencies)
+                        {
+                            List<string> dependencyList;
+
+                            string dependantGUID = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(dep));
+                            if( ! dependantAssetCache.TryGetValue(AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(dep)), out dependencyList))
+                            {
+                                dependencyList = new List<string>();
+                                dependantAssetCache[dependantGUID] = dependencyList;
+                            }
+                            dependencyList.Add(assetGUID);
+                        }
+                    }
+                        
+                }
             }
         }
 

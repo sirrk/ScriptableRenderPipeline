@@ -585,7 +585,7 @@ namespace UnityEditor.VFX
             }
         }
 
-        void SubgraphDirty(VisualEffectObject subgraph)
+        public void SubgraphDirty(VisualEffectObject subgraph)
         {
             if (m_SubgraphDependencies != null && m_SubgraphDependencies.Contains(subgraph))
             {
@@ -605,7 +605,7 @@ namespace UnityEditor.VFX
             Profiler.EndSample();
         }
 
-        IEnumerable<VFXGraph> GetAllGraphs<T>() where T : VisualEffectObject
+        public static IEnumerable<VFXGraph> GetAllGraphs<T>() where T : VisualEffectObject
         {
             var guids = AssetDatabase.FindAssets("t:" + typeof(T).Name);
 
@@ -675,10 +675,7 @@ namespace UnityEditor.VFX
                 if (m_DependentDirty)
                 {
                     var obj = GetResource().visualEffectObject;
-                    foreach (var graph in GetAllGraphs<VisualEffectAsset>())
-                    {
-                        graph.SubgraphDirty(obj);
-                    }
+                    VFXExternalShaderProcessor.RecompileDependencies(obj);
                     m_DependentDirty = false;
                 }
             }
