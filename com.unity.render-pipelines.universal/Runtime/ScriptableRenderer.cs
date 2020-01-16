@@ -683,7 +683,7 @@ namespace UnityEngine.Rendering.Universal
                 Debug.Assert(cameraData.xrPass.viewCount == 2, "View Count must be 2, other view count is not implemented yet!");
 
                 // XRTODO: check gfxDevice multiview extension support here
-                if (false)
+                if (Application.platform == RuntimePlatform.Android)
                 {
                     // Switching to multiview ON
                     cmd.EnableShaderKeyword("STEREO_MULTIVIEW_ON");
@@ -691,7 +691,7 @@ namespace UnityEngine.Rendering.Universal
                 else
                 {
                     cmd.EnableShaderKeyword("STEREO_INSTANCING_ON");
-                    cmd.SetInstanceMultiplier(2);
+                    cmd.SetInstanceMultiplier((uint)cameraData.xrPass.viewCount);
                 }
 
                 context.ExecuteCommandBuffer(cmd);
@@ -707,7 +707,7 @@ namespace UnityEngine.Rendering.Universal
                 Debug.Assert(cameraData.xrPass.viewCount == 2, "View Count must be 2, other view count is not implemented yet!");
 
                 // XRTODO: check gfxDevice multiview extension support here
-                if (false)
+                if (Application.platform == RuntimePlatform.Android)
                 {
                     // Switching to multiview OFF
                     cmd.DisableShaderKeyword("STEREO_MULTIVIEW_ON");

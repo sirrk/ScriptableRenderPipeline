@@ -222,7 +222,7 @@ Shader "Hidden/Universal Render Pipeline/GaussianDepthOfField"
             Name "Gaussian Depth Of Field CoC"
 
             HLSLPROGRAM
-                #pragma vertex Vert
+                #pragma vertex VertQuad
                 #pragma fragment FragCoC
             ENDHLSL
         }
@@ -232,7 +232,7 @@ Shader "Hidden/Universal Render Pipeline/GaussianDepthOfField"
             Name "Gaussian Depth Of Field Prefilter"
 
             HLSLPROGRAM
-                #pragma vertex VertFullscreenMesh
+                #pragma vertex VertQuad
                 #pragma fragment FragPrefilter
                 #pragma multi_compile_local _ _HIGH_QUALITY_SAMPLING
             ENDHLSL
@@ -243,7 +243,7 @@ Shader "Hidden/Universal Render Pipeline/GaussianDepthOfField"
             Name "Gaussian Depth Of Field Blur Horizontal"
 
             HLSLPROGRAM
-                #pragma vertex Vert
+                #pragma vertex VertQuad
                 #pragma fragment FragBlurH
             ENDHLSL
         }
@@ -253,7 +253,7 @@ Shader "Hidden/Universal Render Pipeline/GaussianDepthOfField"
             Name "Gaussian Depth Of Field Blur Vertical"
 
             HLSLPROGRAM
-                #pragma vertex Vert
+                #pragma vertex VertQuad
                 #pragma fragment FragBlurV
             ENDHLSL
         }
@@ -263,7 +263,7 @@ Shader "Hidden/Universal Render Pipeline/GaussianDepthOfField"
             Name "Gaussian Depth Of Field Composite"
 
             HLSLPROGRAM
-                #pragma vertex Vert
+                #pragma vertex VertQuad
                 #pragma fragment FragComposite
                 #pragma multi_compile_local _ _HIGH_QUALITY_SAMPLING
             ENDHLSL

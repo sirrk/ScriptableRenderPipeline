@@ -164,19 +164,13 @@ namespace UnityEngine.Rendering.Universal.Internal
             }
 
             // Render the lut
-            if(URPCameraMode.isPureURP)
-            {
-                Camera camera = renderingData.cameraData.camera;
-                CoreUtils.SetRenderTarget(cmd, m_InternalLut.id);
-                Matrix4x4 projMatrix = GL.GetGPUProjectionMatrix(Matrix4x4.identity, true);
-                RenderingUtils.SetViewProjectionMatrices(cmd, Matrix4x4.identity, projMatrix, true);
-                cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, material);
-                RenderingUtils.SetViewProjectionMatrices(cmd, camera.worldToCameraMatrix, GL.GetGPUProjectionMatrix(camera.projectionMatrix,true), true);
-            }
-            else
-            {
-                Blit(cmd, m_InternalLut.id, m_InternalLut.id, material);
-            }
+            Vector4 scaleBias = new Vector4(1, 1, 0, 0);
+            Vector4 scaleBiasRT = new Vector4(1, 1, 0, 0);
+            cmd.SetGlobalVector(ShaderConstants._BlitScaleBias, scaleBias);
+            cmd.SetGlobalVector(ShaderConstants._BlitScaleBiasRt, scaleBiasRT);
+
+            CoreUtils.SetRenderTarget(cmd, m_InternalLut.id);
+            cmd.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Quads, 4, 1, null);
 
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);
@@ -215,6 +209,8 @@ namespace UnityEngine.Rendering.Universal.Internal
             public static readonly int _CurveHueVsSat     = Shader.PropertyToID("_CurveHueVsSat");
             public static readonly int _CurveLumVsSat     = Shader.PropertyToID("_CurveLumVsSat");
             public static readonly int _CurveSatVsSat     = Shader.PropertyToID("_CurveSatVsSat");
+            public static readonly int _BlitScaleBias     = Shader.PropertyToID("_BlitScaleBias");
+            public static readonly int _BlitScaleBiasRt   = Shader.PropertyToID("_BlitScaleBiasRt");
         }
     }
 }

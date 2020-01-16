@@ -128,7 +128,7 @@ Shader "Hidden/Universal Render Pipeline/PaniniProjection"
             Name "Panini Projection"
 
             HLSLPROGRAM
-                #pragma vertex Vert
+                #pragma vertex VertQuad
                 #pragma fragment Frag
             ENDHLSL
         }

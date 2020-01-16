@@ -29,6 +29,24 @@ Shader "Hidden/Universal Render Pipeline/CameraMotionBlur"
             UNITY_VERTEX_OUTPUT_STEREO
         };
 
+        VaryingsCMB VertCMBQuad(VertQuadAttributes input)
+        {
+            VaryingsCMB output;
+            UNITY_SETUP_INSTANCE_ID(input);
+            UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+            output.positionCS = GetQuadVertexPosition(input.vertexID) * float4(_BlitScaleBiasRt.x, _BlitScaleBiasRt.y, 1, 1) + float4(_BlitScaleBiasRt.z, _BlitScaleBiasRt.w, 0, 0);
+            output.positionCS.xy = output.positionCS.xy * float2(2.0f, -2.0f) + float2(-1.0f, 1.0f); //convert to -1..1
+
+            float4 projPos = output.positionCS * 0.5;
+            projPos.xy = projPos.xy + projPos.w;
+
+            output.uv = GetQuadTexCoord(input.vertexID) * _BlitScaleBias.xy + _BlitScaleBias.zw;
+            output.uv.zw = projPos.xy;
+
+            return output;
+        }
+
+
         VaryingsCMB VertCMB(Attributes input)
         {
             VaryingsCMB output;
@@ -118,7 +136,7 @@ Shader "Hidden/Universal Render Pipeline/CameraMotionBlur"
 
             HLSLPROGRAM
 
-                #pragma vertex VertCMB
+                #pragma vertex VertCMBQuad
                 #pragma fragment Frag
 
                 half4 Frag(VaryingsCMB input) : SV_Target
@@ -135,7 +153,7 @@ Shader "Hidden/Universal Render Pipeline/CameraMotionBlur"
 
             HLSLPROGRAM
 
-                #pragma vertex VertCMB
+                #pragma vertex VertCMBQuad
                 #pragma fragment Frag
 
                 half4 Frag(VaryingsCMB input) : SV_Target
@@ -152,7 +170,7 @@ Shader "Hidden/Universal Render Pipeline/CameraMotionBlur"
 
             HLSLPROGRAM
 
-                #pragma vertex VertCMB
+                #pragma vertex VertCMBQuad
                 #pragma fragment Frag
 
                 half4 Frag(VaryingsCMB input) : SV_Target

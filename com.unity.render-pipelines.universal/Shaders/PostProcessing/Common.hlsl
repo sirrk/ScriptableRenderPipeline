@@ -13,6 +13,12 @@ struct Attributes
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
+struct VertQuadAttributes
+{
+    uint vertexID : SV_VertexID;
+    UNITY_VERTEX_INPUT_INSTANCE_ID
+};
+
 struct Varyings
 {
     float4 positionCS    : SV_POSITION;
@@ -30,24 +36,17 @@ Varyings Vert(Attributes input)
     return output;
 }
 
-// ----------------------------------------------------------------------------------
-// Render fullscreen mesh by using a matrix set directly by the pipeline instead of
-// relying on the matrix set by the C++ engine to avoid issues with XR
+uniform float4 _BlitScaleBias;
+uniform float4 _BlitScaleBiasRt;
 
-float4x4 _FullscreenProjMat;
-
-float4 TransformFullscreenMesh(half3 positionOS)
-{
-    return mul(_FullscreenProjMat, half4(positionOS, 1));
-}
-
-Varyings VertFullscreenMesh(Attributes input)
+Varyings VertQuad(VertQuadAttributes input)
 {
     Varyings output;
     UNITY_SETUP_INSTANCE_ID(input);
     UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
-    output.positionCS = TransformFullscreenMesh(input.positionOS.xyz);
-    output.uv = input.uv;
+    output.positionCS = GetQuadVertexPosition(input.vertexID) * float4(_BlitScaleBiasRt.x, _BlitScaleBiasRt.y, 1, 1) + float4(_BlitScaleBiasRt.z, _BlitScaleBiasRt.w, 0, 0);
+    output.positionCS.xy = output.positionCS.xy * float2(2.0f, -2.0f) + float2(-1.0f, 1.0f); //convert to -1..1
+    output.uv = GetQuadTexCoord(input.vertexID) * _BlitScaleBias.xy + _BlitScaleBias.zw;
     return output;
 }
 

@@ -146,7 +146,7 @@ Shader "Hidden/Universal Render Pipeline/FinalPost"
             Name "FinalPost"
 
             HLSLPROGRAM
-                #pragma vertex Vert
+                #pragma vertex VertQuad
                 #pragma fragment Frag
             ENDHLSL
         }

@@ -155,7 +155,7 @@ Shader "Hidden/Universal Render Pipeline/Bloom"
             Name "Bloom Prefilter"
 
             HLSLPROGRAM
-                #pragma vertex Vert
+                #pragma vertex VertQuad
                 #pragma fragment FragPrefilter
             ENDHLSL
         }
@@ -165,7 +165,7 @@ Shader "Hidden/Universal Render Pipeline/Bloom"
             Name "Bloom Blur Horizontal"
 
             HLSLPROGRAM
-                #pragma vertex Vert
+                #pragma vertex VertQuad
                 #pragma fragment FragBlurH
             ENDHLSL
         }
@@ -175,7 +175,7 @@ Shader "Hidden/Universal Render Pipeline/Bloom"
             Name "Bloom Blur Vertical"
 
             HLSLPROGRAM
-                #pragma vertex Vert
+                #pragma vertex VertQuad
                 #pragma fragment FragBlurV
             ENDHLSL
         }
@@ -185,7 +185,7 @@ Shader "Hidden/Universal Render Pipeline/Bloom"
             Name "Bloom Upsample"
 
             HLSLPROGRAM
-                #pragma vertex Vert
+                #pragma vertex VertQuad
                 #pragma fragment FragUpsample
                 #pragma multi_compile_local _ _BLOOM_HQ
             ENDHLSL

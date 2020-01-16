@@ -41,7 +41,7 @@ Shader "Hidden/Universal Render Pipeline/Stop NaN"
             Name "Stop NaN"
 
             HLSLPROGRAM
-                #pragma vertex Vert
+                #pragma vertex VertQuad
                 #pragma fragment Frag
             ENDHLSL
         }

@@ -47,13 +47,14 @@ struct VaryingsEdge
     UNITY_VERTEX_OUTPUT_STEREO
 };
 
-VaryingsEdge VertEdge(Attributes input)
+VaryingsEdge VertEdge(VertQuadAttributes input)
 {
     VaryingsEdge output;
     UNITY_SETUP_INSTANCE_ID(input);
     UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
-    output.positionCS = TransformFullscreenMesh(input.positionOS.xyz);
-    output.uv = UnityStereoTransformScreenSpaceTex(input.uv);
+    output.positionCS = GetQuadVertexPosition(input.vertexID) * float4(_BlitScaleBiasRt.x, _BlitScaleBiasRt.y, 1, 1) + float4(_BlitScaleBiasRt.z, _BlitScaleBiasRt.w, 0, 0);
+    output.positionCS.xy = output.positionCS.xy * float2(2.0f, -2.0f) + float2(-1.0f, 1.0f); //convert to -1..1
+    output.uv = GetQuadTexCoord(input.vertexID) * _BlitScaleBias.xy + _BlitScaleBias.zw;
     SMAAEdgeDetectionVS(output.uv, output.offsets);
     return output;
 }
@@ -76,13 +77,14 @@ struct VaryingsBlend
     UNITY_VERTEX_OUTPUT_STEREO
 };
 
-VaryingsBlend VertBlend(Attributes input)
+VaryingsBlend VertBlend(VertQuadAttributes input)
 {
     VaryingsBlend output;
     UNITY_SETUP_INSTANCE_ID(input);
     UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
-    output.positionCS = TransformFullscreenMesh(input.positionOS.xyz);
-    output.uv = UnityStereoTransformScreenSpaceTex(input.uv);
+    output.positionCS = GetQuadVertexPosition(input.vertexID) * float4(_BlitScaleBiasRt.x, _BlitScaleBiasRt.y, 1, 1) + float4(_BlitScaleBiasRt.z, _BlitScaleBiasRt.w, 0, 0);
+    output.positionCS.xy = output.positionCS.xy * float2(2.0f, -2.0f) + float2(-1.0f, 1.0f); //convert to -1..1
+    output.uv = GetQuadTexCoord(input.vertexID) * _BlitScaleBias.xy + _BlitScaleBias.zw;
     SMAABlendingWeightCalculationVS(output.uv, output.pixcoord, output.offsets);
     return output;
 }
@@ -104,13 +106,14 @@ struct VaryingsNeighbor
     UNITY_VERTEX_OUTPUT_STEREO
 };
 
-VaryingsNeighbor VertNeighbor(Attributes input)
+VaryingsNeighbor VertNeighbor(VertQuadAttributes input)
 {
     VaryingsNeighbor output;
     UNITY_SETUP_INSTANCE_ID(input);
     UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
-    output.positionCS = TransformFullscreenMesh(input.positionOS.xyz);
-    output.uv = UnityStereoTransformScreenSpaceTex(input.uv);
+    output.positionCS = GetQuadVertexPosition(input.vertexID) * float4(_BlitScaleBiasRt.x, _BlitScaleBiasRt.y, 1, 1) + float4(_BlitScaleBiasRt.z, _BlitScaleBiasRt.w, 0, 0);
+    output.positionCS.xy = output.positionCS.xy * float2(2.0f, -2.0f) + float2(-1.0f, 1.0f); //convert to -1..1
+    output.uv = GetQuadTexCoord(input.vertexID) * _BlitScaleBias.xy + _BlitScaleBias.zw;
     SMAANeighborhoodBlendingVS(output.uv, output.offset);
     return output;
 }

@@ -244,7 +244,7 @@ Shader "Hidden/Universal Render Pipeline/BokehDepthOfField"
             Name "Bokeh Depth Of Field CoC"
 
             HLSLPROGRAM
-                #pragma vertex Vert
+                #pragma vertex VertQuad
                 #pragma fragment FragCoC
                 #pragma target 4.5
             ENDHLSL
@@ -255,7 +255,7 @@ Shader "Hidden/Universal Render Pipeline/BokehDepthOfField"
             Name "Bokeh Depth Of Field Prefilter"
 
             HLSLPROGRAM
-                #pragma vertex Vert
+                #pragma vertex VertQuad
                 #pragma fragment FragPrefilter
                 #pragma target 4.5
             ENDHLSL
@@ -266,7 +266,7 @@ Shader "Hidden/Universal Render Pipeline/BokehDepthOfField"
             Name "Bokeh Depth Of Field Blur"
 
             HLSLPROGRAM
-                #pragma vertex Vert
+                #pragma vertex VertQuad
                 #pragma fragment FragBlur
                 #pragma target 4.5
             ENDHLSL
@@ -277,7 +277,7 @@ Shader "Hidden/Universal Render Pipeline/BokehDepthOfField"
             Name "Bokeh Depth Of Field Post Blur"
 
             HLSLPROGRAM
-                #pragma vertex Vert
+                #pragma vertex VertQuad
                 #pragma fragment FragPostBlur
                 #pragma target 4.5
             ENDHLSL
@@ -288,7 +288,7 @@ Shader "Hidden/Universal Render Pipeline/BokehDepthOfField"
             Name "Bokeh Depth Of Field Composite"
 
             HLSLPROGRAM
-                #pragma vertex Vert
+                #pragma vertex VertQuad
                 #pragma fragment FragComposite
                 #pragma target 4.5
             ENDHLSL
@@ -307,7 +307,7 @@ Shader "Hidden/Universal Render Pipeline/BokehDepthOfField"
             Name "Bokeh Depth Of Field CoC"
 
             HLSLPROGRAM
-                #pragma vertex Vert
+                #pragma vertex VertQuad
                 #pragma fragment FragCoC
                 #pragma target 3.5
             ENDHLSL
@@ -318,7 +318,7 @@ Shader "Hidden/Universal Render Pipeline/BokehDepthOfField"
             Name "Bokeh Depth Of Field Prefilter"
 
             HLSLPROGRAM
-                #pragma vertex Vert
+                #pragma vertex VertQuad
                 #pragma fragment FragPrefilter
                 #pragma target 3.5
             ENDHLSL
@@ -329,7 +329,7 @@ Shader "Hidden/Universal Render Pipeline/BokehDepthOfField"
             Name "Bokeh Depth Of Field Blur"
 
             HLSLPROGRAM
-                #pragma vertex Vert
+                #pragma vertex VertQuad
                 #pragma fragment FragBlur
                 #pragma target 3.5
             ENDHLSL
@@ -340,7 +340,7 @@ Shader "Hidden/Universal Render Pipeline/BokehDepthOfField"
             Name "Bokeh Depth Of Field Post Blur"
 
             HLSLPROGRAM
-                #pragma vertex Vert
+                #pragma vertex VertQuad
                 #pragma fragment FragPostBlur
                 #pragma target 3.5
             ENDHLSL
@@ -351,7 +351,7 @@ Shader "Hidden/Universal Render Pipeline/BokehDepthOfField"
             Name "Bokeh Depth Of Field Composite"
 
             HLSLPROGRAM
-                #pragma vertex Vert
+                #pragma vertex VertQuad
                 #pragma fragment FragComposite
                 #pragma target 3.5
             ENDHLSL
