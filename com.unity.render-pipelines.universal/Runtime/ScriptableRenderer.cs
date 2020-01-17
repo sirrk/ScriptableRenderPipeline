@@ -230,29 +230,24 @@ namespace UnityEngine.Rendering.Universal
 
         internal void UpdateGPUViewProjectionMatricies(CommandBuffer cmd, ref CameraData cameraData, bool isRenderToTexture)
         {
-            if (URPCameraMode.isPureURP)
+            // if contains only 1 view, setup view proj
+            if (!cameraData.xrPass.hasMultiXrView)
             {
-                // if contains only 1 view, setup view proj
-                if (!cameraData.xrPass.hasMultiXrView)
+                Matrix4x4 projectionMatrix = GL.GetGPUProjectionMatrix(cameraData.xrPass.GetProjMatrix(0), isRenderToTexture);
+                RenderingUtils.SetViewProjectionMatrices(cmd, cameraData.xrPass.GetViewMatrix(0), projectionMatrix, false);
+            }
+            // else, set up multi view proj to stereo buffer
+            else
+            {
+                //XRTODO: compute stereo data while constructing XRPass
+                Matrix4x4[] stereoProjectionMatrix = new Matrix4x4[2];
+                Matrix4x4[] stereoViewMatrix = new Matrix4x4[2];
+                for (int i = 0; i < 2; i++)
                 {
-                    Matrix4x4 projectionMatrix = GL.GetGPUProjectionMatrix(cameraData.xrPass.GetProjMatrix(0), isRenderToTexture);
-                    RenderingUtils.SetViewProjectionMatrices(cmd, cameraData.xrPass.GetViewMatrix(0), projectionMatrix, false);
+                    stereoViewMatrix[i] = cameraData.xrPass.GetViewMatrix(i);
+                    stereoProjectionMatrix[i] = GL.GetGPUProjectionMatrix(cameraData.xrPass.GetProjMatrix(i), isRenderToTexture);
                 }
-                // else, set up multi view proj to stereo buffer
-                // camera stack goes here too?
-                else
-                {
-                    //XRTODO: compute stereo data while constructing XRPass
-                    Matrix4x4[] stereoProjectionMatrix = new Matrix4x4[2];
-                    Matrix4x4[] stereoViewMatrix = new Matrix4x4[2];
-                    for (int i = 0; i < 2; i++)
-                    {
-                        stereoViewMatrix[i] = cameraData.xrPass.GetViewMatrix(i);
-                        stereoProjectionMatrix[i] = GL.GetGPUProjectionMatrix(cameraData.xrPass.GetProjMatrix(i), isRenderToTexture);
-                    }
-                    RenderingUtils.SetStereoViewProjectionMatrices(cmd, stereoViewMatrix, stereoProjectionMatrix, false);
-                    //Debug.LogError("Need to setup matricies for multi view camera target case!");
-                }
+                RenderingUtils.SetStereoViewProjectionMatrices(cmd, stereoViewMatrix, stereoProjectionMatrix, false);
             }
         }
 
@@ -332,17 +327,11 @@ namespace UnityEngine.Rendering.Universal
             // TODO: We need to expose all work done in SetupCameraProperties above to c# land. This not only
             // avoids resetting values but also guarantee values are correct for all systems.
             // Known Issue: billboard will not work with camera stacking when using viewport with aspect ratio different from default aspect.
+            // Known Issue: XR will not work with camera stacking when using viewport with aspect/fov ratio different from default aspect.
             if (cameraData.renderType == CameraRenderType.Overlay)
             {
-                if (URPCameraMode.isPureURP)
-                {
-                    Matrix4x4 projMatrix = GL.GetGPUProjectionMatrix(cameraData.projectionMatrix, false);
-                    RenderingUtils.SetViewProjectionMatrices(cmd, cameraData.viewMatrix, projMatrix, false);
-                }
-                else
-                {
-                    cmd.SetViewProjectionMatrices(cameraData.viewMatrix, cameraData.projectionMatrix);
-                }
+                Matrix4x4 projMatrix = GL.GetGPUProjectionMatrix(cameraData.projectionMatrix, false);
+                RenderingUtils.SetViewProjectionMatrices(cmd, cameraData.viewMatrix, projMatrix, false);
             }
 
             // Override time values from when `SetupCameraProperties` were called.
@@ -499,7 +488,7 @@ namespace UnityEngine.Rendering.Universal
             Camera camera = cameraData.camera;
 
             CommandBuffer cmd = CommandBufferPool.Get(k_SetRenderTarget);
-            renderPass.Configure(cmd, cameraData.cameraTargetDescriptor);
+            renderPass.Configure(cmd, cameraData.xrPass.renderTargetDesc);
             renderPass.eyeIndex = eyeIndex;
 
             ClearFlag cameraClearFlag = GetCameraClearFlag(ref cameraData);

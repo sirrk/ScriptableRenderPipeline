@@ -16,8 +16,8 @@ namespace UnityEngine.Rendering.Universal.Internal
         private RenderTargetHandle source { get; set; }
         private RenderTargetHandle destination { get; set; }
         Material m_CopyDepthMaterial;
+        RenderTextureDescriptor m_Descriptor;
         const string m_ProfilerTag = "Copy Depth";
-
         public CopyDepthPass(RenderPassEvent evt, Material copyDepthMaterial)
         {
             m_CopyDepthMaterial = copyDepthMaterial;
@@ -37,11 +37,11 @@ namespace UnityEngine.Rendering.Universal.Internal
 
         public override void Configure(CommandBuffer cmd, RenderTextureDescriptor cameraTextureDescriptor)
         {
-            var descriptor = cameraTextureDescriptor;
-            descriptor.colorFormat = RenderTextureFormat.Depth;
-            descriptor.depthBufferBits = 32; //TODO: do we really need this. double check;
-            descriptor.msaaSamples = 1;
-            cmd.GetTemporaryRT(destination.id, descriptor, FilterMode.Point);
+            m_Descriptor = cameraTextureDescriptor;
+            m_Descriptor.colorFormat = RenderTextureFormat.Depth;
+            m_Descriptor.depthBufferBits = 32; //TODO: do we really need this. double check;
+            m_Descriptor.msaaSamples = 1;
+            cmd.GetTemporaryRT(destination.id, m_Descriptor, FilterMode.Point);
         }
 
         /// <inheritdoc/>
@@ -57,71 +57,44 @@ namespace UnityEngine.Rendering.Universal.Internal
             RenderTargetIdentifier depthSurface = source.Identifier();
             RenderTargetIdentifier copyDepthSurface = destination.Identifier();
 
-            RenderTextureDescriptor descriptor = renderingData.cameraData.cameraTargetDescriptor;
-            int cameraSamples = descriptor.msaaSamples;
-
-            // TODO: we don't need a command buffer here. We can set these via Material.Set* API
+            Vector4 scaleBias = new Vector4(1, 1, 0, 0);
+            Vector4 scaleBiasRT = new Vector4(1, 1, 0, 0);
+            cmd.SetGlobalVector(ShaderConstants._BlitScaleBias, scaleBias);
+            cmd.SetGlobalVector(ShaderConstants._BlitScaleBiasRt, scaleBiasRT);
             cmd.SetGlobalTexture("_CameraDepthAttachment", source.Identifier());
 
-            if (URPCameraMode.isPureURP)
+            RenderTextureDescriptor descriptor = m_Descriptor;
+            int cameraSamples = descriptor.msaaSamples;
+            switch (cameraSamples)
             {
-                switch (cameraSamples)
-                {
-                    case 1:
-                        cmd.EnableShaderKeyword(ShaderKeywordStrings.DepthNoMsaa);
-                        cmd.DisableShaderKeyword(ShaderKeywordStrings.DepthMsaa2);
-                        cmd.DisableShaderKeyword(ShaderKeywordStrings.DepthMsaa4);
-                        break;
-                    case 2:
-                        cmd.DisableShaderKeyword(ShaderKeywordStrings.DepthNoMsaa);
-                        cmd.EnableShaderKeyword(ShaderKeywordStrings.DepthMsaa2);
-                        cmd.DisableShaderKeyword(ShaderKeywordStrings.DepthMsaa4);
-                        break;
-                    case 4:
-                        cmd.DisableShaderKeyword(ShaderKeywordStrings.DepthNoMsaa);
-                        cmd.DisableShaderKeyword(ShaderKeywordStrings.DepthMsaa2);
-                        cmd.EnableShaderKeyword(ShaderKeywordStrings.DepthMsaa4);
-                        break;
-                    default:
-                        // XRTODO: Add err msg. This case shouldn't really happend. Could be undefined behavior
-                        cmd.EnableShaderKeyword(ShaderKeywordStrings.DepthNoMsaa);
-                        cmd.DisableShaderKeyword(ShaderKeywordStrings.DepthMsaa2);
-                        cmd.DisableShaderKeyword(ShaderKeywordStrings.DepthMsaa4);
-                        break;
-                }
-                ScriptableRenderer.SetRenderTarget(cmd, copyDepthSurface, BuiltinRenderTextureType.CameraTarget, clearFlag, clearColor);
-                ref Camera camera = ref renderingData.cameraData.camera;
-                Matrix4x4 projMatrix = GL.GetGPUProjectionMatrix(Matrix4x4.identity, true);
-                RenderingUtils.SetViewProjectionMatrices(cmd, Matrix4x4.identity, projMatrix, true);
-                cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, m_CopyDepthMaterial);
-                RenderingUtils.SetViewProjectionMatrices(cmd, camera.worldToCameraMatrix, GL.GetGPUProjectionMatrix(camera.projectionMatrix, true), true);
-            }
-            else
-            {
-                if (cameraSamples > 1)
-                {
-                    cmd.DisableShaderKeyword(ShaderKeywordStrings.DepthNoMsaa);
-                    if (cameraSamples == 4)
-                    {
-                        cmd.DisableShaderKeyword(ShaderKeywordStrings.DepthMsaa2);
-                        cmd.EnableShaderKeyword(ShaderKeywordStrings.DepthMsaa4);
-                    }
-                    else
-                    {
-                        cmd.EnableShaderKeyword(ShaderKeywordStrings.DepthMsaa2);
-                        cmd.DisableShaderKeyword(ShaderKeywordStrings.DepthMsaa4);
-                    }
-
-                    Blit(cmd, depthSurface, copyDepthSurface, m_CopyDepthMaterial);
-                }
-                else
-                {
+                case 1:
                     cmd.EnableShaderKeyword(ShaderKeywordStrings.DepthNoMsaa);
                     cmd.DisableShaderKeyword(ShaderKeywordStrings.DepthMsaa2);
                     cmd.DisableShaderKeyword(ShaderKeywordStrings.DepthMsaa4);
-                    CopyTexture(cmd, depthSurface, copyDepthSurface, m_CopyDepthMaterial);
-                }
+                    break;
+                case 2:
+                    cmd.DisableShaderKeyword(ShaderKeywordStrings.DepthNoMsaa);
+                    cmd.EnableShaderKeyword(ShaderKeywordStrings.DepthMsaa2);
+                    cmd.DisableShaderKeyword(ShaderKeywordStrings.DepthMsaa4);
+                    break;
+                case 4:
+                    cmd.DisableShaderKeyword(ShaderKeywordStrings.DepthNoMsaa);
+                    cmd.DisableShaderKeyword(ShaderKeywordStrings.DepthMsaa2);
+                    cmd.EnableShaderKeyword(ShaderKeywordStrings.DepthMsaa4);
+                    break;
+                default:
+                    // XRTODO: Add err msg. This case shouldn't really happend. Could be undefined behavior
+                    cmd.EnableShaderKeyword(ShaderKeywordStrings.DepthNoMsaa);
+                    cmd.DisableShaderKeyword(ShaderKeywordStrings.DepthMsaa2);
+                    cmd.DisableShaderKeyword(ShaderKeywordStrings.DepthMsaa4);
+                    break;
             }
+
+            ScriptableRenderer.SetRenderTarget(cmd, new RenderTargetIdentifier(copyDepthSurface, 0, CubemapFace.Unknown, -1),
+                                               BuiltinRenderTextureType.CameraTarget, clearFlag, clearColor);
+            
+            cmd.DrawProcedural(Matrix4x4.identity, m_CopyDepthMaterial, 0, MeshTopology.Quads, 4, 1, null);
+            
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);
         }
@@ -143,6 +116,13 @@ namespace UnityEngine.Rendering.Universal.Internal
 
             cmd.ReleaseTemporaryRT(destination.id);
             destination = RenderTargetHandle.CameraTarget;
+        }
+
+        // Precomputed shader ids to save some CPU cycles (mostly affects mobile)
+        static class ShaderConstants
+        {
+            public static readonly int _BlitScaleBias = Shader.PropertyToID("_BlitScaleBias");
+            public static readonly int _BlitScaleBiasRt = Shader.PropertyToID("_BlitScaleBiasRt");
         }
     }
 }

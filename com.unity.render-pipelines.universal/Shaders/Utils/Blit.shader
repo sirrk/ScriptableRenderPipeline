@@ -16,7 +16,7 @@ Shader "Hidden/Universal Render Pipeline/Blit"
             // Required to compile gles 2.0 with standard srp library
             #pragma prefer_hlslcc gles
             #pragma exclude_renderers d3d11_9x
-            #pragma vertex Vertex
+            #pragma vertex VertQuad
             #pragma fragment Fragment
 
             #pragma multi_compile _ _LINEAR_TO_SRGB_CONVERSION
@@ -33,6 +33,12 @@ Shader "Hidden/Universal Render Pipeline/Blit"
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
+            struct VertQuadAttributes
+            {
+                uint vertexID : SV_VertexID;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
+            };
+
             struct Varyings
             {
                 half4 positionCS    : SV_POSITION;
@@ -42,6 +48,22 @@ Shader "Hidden/Universal Render Pipeline/Blit"
 
             TEXTURE2D_X(_BlitTex);
             SAMPLER(sampler_BlitTex);
+
+            uniform float4 _BlitScaleBias;
+            uniform float4 _BlitScaleBiasRt;
+
+            Varyings VertQuad(VertQuadAttributes input)
+            {
+                Varyings output;
+
+                UNITY_SETUP_INSTANCE_ID(input);
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+
+                output.positionCS = GetQuadVertexPosition(input.vertexID) * float4(_BlitScaleBiasRt.x, _BlitScaleBiasRt.y, 1, 1) + float4(_BlitScaleBiasRt.z, _BlitScaleBiasRt.w, 0, 0);
+                output.positionCS.xy = output.positionCS.xy * float2(2.0f, -2.0f) + float2(-1.0f, 1.0f); //convert to -1..1
+                output.uv = GetQuadTexCoord(input.vertexID) * _BlitScaleBias.xy + _BlitScaleBias.zw;
+                return output;
+            }
 
             Varyings Vertex(Attributes input)
             {

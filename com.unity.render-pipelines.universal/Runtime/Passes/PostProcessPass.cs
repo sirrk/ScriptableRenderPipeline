@@ -438,8 +438,7 @@ namespace UnityEngine.Rendering.Universal.Internal
             cmd.GetTemporaryRT(ShaderConstants._EdgeTexture, GetStereoCompatibleDescriptor(m_Descriptor.width, m_Descriptor.height, GraphicsFormat.R8G8B8A8_UNorm, tempDepthBits), FilterMode.Point);
             cmd.GetTemporaryRT(ShaderConstants._BlendTexture, GetStereoCompatibleDescriptor(m_Descriptor.width, m_Descriptor.height, GraphicsFormat.R8G8B8A8_UNorm), FilterMode.Point);
 
-            bool yflip = false;
-            Vector4 scaleBias = yflip ? new Vector4(1, -1, 0, 1) : new Vector4(1, 1, 0, 0);
+            Vector4 scaleBias = new Vector4(1, 1, 0, 0);
             Vector4 scaleBiasRT = new Vector4(1, 1, 0, 0);
             cmd.SetGlobalVector(ShaderConstants._BlitScaleBias, scaleBias);
             cmd.SetGlobalVector(ShaderConstants._BlitScaleBiasRt, scaleBiasRT);

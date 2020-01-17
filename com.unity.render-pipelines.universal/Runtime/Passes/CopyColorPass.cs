@@ -75,54 +75,31 @@ namespace UnityEngine.Rendering.Universal.Internal
             CommandBuffer cmd = CommandBufferPool.Get(m_ProfilerTag);
             RenderTargetIdentifier opaqueColorRT = destination.Identifier();
 
-            if (URPCameraMode.isPureURP)
+            Vector4 scaleBias = new Vector4(1, 1, 0, 0);
+            Vector4 scaleBiasRT = new Vector4(1, 1, 0, 0);
+            cmd.SetGlobalVector(ShaderConstants._BlitScaleBias, scaleBias);
+            cmd.SetGlobalVector(ShaderConstants._BlitScaleBiasRt, scaleBiasRT);
+            cmd.SetGlobalTexture("_BlitTex", source);
+
+            ScriptableRenderer.SetRenderTarget(cmd, new RenderTargetIdentifier(opaqueColorRT, 0, CubemapFace.Unknown, -1),
+                                                       BuiltinRenderTextureType.CameraTarget, clearFlag, clearColor);
+            switch (m_DownsamplingMethod)
             {
-                cmd.SetGlobalTexture("_BlitTex", source);
-                ref Camera camera = ref renderingData.cameraData.camera;
-                Matrix4x4 projMatrix = GL.GetGPUProjectionMatrix(Matrix4x4.identity, true);
-                RenderingUtils.SetViewProjectionMatrices(cmd, Matrix4x4.identity, projMatrix, true);
-                switch (m_DownsamplingMethod)
-                {
-                    case Downsampling.None:
-                        ScriptableRenderer.SetRenderTarget(cmd, opaqueColorRT, BuiltinRenderTextureType.CameraTarget, clearFlag, clearColor);
-                        cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, m_CopyColorMaterial);
-                        break;
-                    case Downsampling._2xBilinear:
-                        ScriptableRenderer.SetRenderTarget(cmd, opaqueColorRT, BuiltinRenderTextureType.CameraTarget, clearFlag, clearColor);
-                        cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, m_CopyColorMaterial);
-                        break;
-                    case Downsampling._4xBox:
-                        ScriptableRenderer.SetRenderTarget(cmd, opaqueColorRT, BuiltinRenderTextureType.CameraTarget, clearFlag, clearColor);
-                        m_SamplingMaterial.SetFloat(m_SampleOffsetShaderHandle, 2);
-                        cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, m_SamplingMaterial);
-                        break;
-                    case Downsampling._4xBilinear:
-                        ScriptableRenderer.SetRenderTarget(cmd, opaqueColorRT, BuiltinRenderTextureType.CameraTarget, clearFlag, clearColor);
-                        cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, m_CopyColorMaterial);
-                        break;
-                }
-                RenderingUtils.SetViewProjectionMatrices(cmd, camera.worldToCameraMatrix, GL.GetGPUProjectionMatrix(camera.projectionMatrix, true), true);
+                case Downsampling.None:
+                    cmd.DrawProcedural(Matrix4x4.identity, m_CopyColorMaterial, 0, MeshTopology.Quads, 4, 1, null);
+                    break;
+                case Downsampling._2xBilinear:
+                    cmd.DrawProcedural(Matrix4x4.identity, m_CopyColorMaterial, 0, MeshTopology.Quads, 4, 1, null);
+                    break;
+                case Downsampling._4xBox:
+                    m_SamplingMaterial.SetFloat(m_SampleOffsetShaderHandle, 2);
+                    cmd.DrawProcedural(Matrix4x4.identity, m_SamplingMaterial, 0, MeshTopology.Quads, 4, 1, null);
+                    break;
+                case Downsampling._4xBilinear:
+                    cmd.DrawProcedural(Matrix4x4.identity, m_CopyColorMaterial, 0, MeshTopology.Quads, 4, 1, null);
+                    break;
             }
-            else
-            {
-                switch (m_DownsamplingMethod)
-                {
-                    case Downsampling.None:
-                        Blit(cmd, source, opaqueColorRT);
-                        break;
-                    case Downsampling._2xBilinear:
-                        Blit(cmd, source, opaqueColorRT);
-                        break;
-                    case Downsampling._4xBox:
-                        m_SamplingMaterial.SetFloat(m_SampleOffsetShaderHandle, 2);
-                        Blit(cmd, source, opaqueColorRT, m_SamplingMaterial);
-                        break;
-                    case Downsampling._4xBilinear:
-                        Blit(cmd, source, opaqueColorRT);
-                        break;
-                }
-            }
-           
+            
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);
         }
@@ -138,6 +115,13 @@ namespace UnityEngine.Rendering.Universal.Internal
                 cmd.ReleaseTemporaryRT(destination.id);
                 destination = RenderTargetHandle.CameraTarget;
             }
+        }
+
+        // Precomputed shader ids to save some CPU cycles (mostly affects mobile)
+        static class ShaderConstants
+        {
+            public static readonly int _BlitScaleBias = Shader.PropertyToID("_BlitScaleBias");
+            public static readonly int _BlitScaleBiasRt = Shader.PropertyToID("_BlitScaleBiasRt");
         }
     }
 }

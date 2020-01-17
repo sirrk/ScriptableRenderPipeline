@@ -440,11 +440,6 @@ namespace UnityEngine.Rendering.Universal
         {
             var settings = asset;
             cameraData.targetTexture = baseCamera.targetTexture;
-
-            //XRTODO: default pure on
-            {
-                URPCameraMode.isPureURP = true;
-            }
             cameraData.isSceneViewCamera = baseCamera.cameraType == CameraType.SceneView;
 
             ///////////////////////////////////////////////////////////////////
