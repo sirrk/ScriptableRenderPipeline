@@ -10,8 +10,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added the option to toggle shadow receiving on transparent objects.
 
 ### Changed
-- Eliminated some GC allocations from the 2D Renderer.
-- Added SceneSelection pass for TerrainLit shader.
 - Particle shaders now receive shadows
 
 ### Fixed
