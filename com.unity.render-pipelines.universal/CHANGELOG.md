@@ -10,7 +10,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added the option to toggle shadow receiving on transparent objects.
 
 ### Changed
-- Moved the icon that indicates the type of a Light 2D from the Inspector header to the Light Type field.
 - Eliminated some GC allocations from the 2D Renderer.
 - Added SceneSelection pass for TerrainLit shader.
 - Particle shaders now receive shadows
@@ -54,14 +53,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [7.1.3] - 2019-11-04
 ### Added
 - Added default implementations of OnPreprocessMaterialDescription for FBX, Obj, Sketchup and 3DS file formats.
-- Added the option to toggle shadow receiving on transparent objects.
 
 ### Changed
 - Moved the icon that indicates the type of a Light 2D from the Inspector header to the Light Type field.
 - Eliminated some GC allocations from the 2D Renderer.
 - Deprecated the CinemachineUniversalPixelPerfect extension. Use the one from Cinemachine v2.4 instead.
 - Replaced PlayerSettings.virtualRealitySupported with XRGraphics.tryEnable.
-- Particle shaders now receive shadows
 
 ### Fixed
 - Fixed an issue where linear to sRGB conversion occurred twice on certain Android devices.
