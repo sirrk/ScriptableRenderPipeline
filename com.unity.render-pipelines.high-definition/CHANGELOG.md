@@ -390,6 +390,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updated the default scene and default DXR scene and DefaultVolumeProfile.
 - Refactoring pre-existing materials to share more shader code between rasterization and ray tracing.
 - Setting a material's Refraction Model to Thin does not overwrite the Thickness and Transmission Absorption Distance anymore.
+- Resign the recursive rendering queue system to make it work when the effect is disabled
 
 ## [7.1.1] - 2019-09-05
 

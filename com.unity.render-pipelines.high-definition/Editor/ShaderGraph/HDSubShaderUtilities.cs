@@ -1330,19 +1330,6 @@ namespace UnityEditor.Rendering.HighDefinition
                     return "Low Resolution";
                 case HDRenderQueue.RenderQueueType.AfterPostprocessTransparent:
                     return "After Post-process";
-
-                case HDRenderQueue.RenderQueueType.RaytracingOpaque:
-                {
-                    if ((RenderPipelineManager.currentPipeline as HDRenderPipeline).rayTracingSupported)
-                        return "RayTracing";
-                    return "None";
-                }
-                case HDRenderQueue.RenderQueueType.RaytracingTransparent:
-                {
-                    if ((RenderPipelineManager.currentPipeline as HDRenderPipeline).rayTracingSupported)
-                        return "RayTracing";
-                    return "None";
-                }
                 default:
                     return "None";
             }
@@ -1358,8 +1345,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 result.Add(HDRenderQueue.RenderQueueType.Opaque);
                 if (needAfterPostProcess)
                     result.Add(HDRenderQueue.RenderQueueType.AfterPostProcessOpaque);
-                if (supportsRayTracing)
-                    result.Add(HDRenderQueue.RenderQueueType.RaytracingOpaque);
             }
             else
             {
@@ -1368,8 +1353,6 @@ namespace UnityEditor.Rendering.HighDefinition
                 result.Add(HDRenderQueue.RenderQueueType.LowTransparent);
                 if (needAfterPostProcess)
                     result.Add(HDRenderQueue.RenderQueueType.AfterPostprocessTransparent);
-                if (supportsRayTracing)
-                    result.Add(HDRenderQueue.RenderQueueType.RaytracingTransparent);
             }
 
             return result;
