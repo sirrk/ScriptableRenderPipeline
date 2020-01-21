@@ -49,6 +49,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Documentation links on nodes now point to the correct URLs and package versions.
 - You can now smoothly edit controls on the `Dielectric Specular` node.
 - Fixed Blackboard Properties to support scientific notation.
+- Fixed a bug where the error `Output value 'vert' is not initialized` displayed on all PBR graphs in Universal. [1210710](https://issuetracker.unity3d.com/issues/output-value-vert-is-not-completely-initialized-error-is-thrown-when-pbr-graph-is-created-using-urp)
 
 ## [7.1.1] - 2019-09-05
 ### Added
