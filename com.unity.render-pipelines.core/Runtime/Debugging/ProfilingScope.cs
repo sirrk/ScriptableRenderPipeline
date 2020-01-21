@@ -78,10 +78,14 @@ namespace UnityEngine.Rendering
         /// <param name="name">Name of the profiling sampler.</param>
         public ProfilingSampler(string name)
         {
+            // Caution: Name of sampler MUST not match name provide to cmd.BeginSample(), otherwise
+            // we get a mismatch of marker when enabling the profiler.
 #if UNITY_USE_RECORDER
             sampler = CustomSampler.Create(name, true); // Event markers, command buffer CPU profiling and GPU profiling
 #else
-            sampler = CustomSampler.Create(name);
+            // In this case, we need to use the BeginSample(string) API, since it creates a new sampler by that name under the hood,
+            // we need rename this sampler to not clash with the implicit one (it won't be used in this case)
+            sampler = CustomSampler.Create($"Dummy_{name}");
 #endif
             inlineSampler = CustomSampler.Create($"Inl_{name}"); // Profiles code "immediately"
             this.name = name;

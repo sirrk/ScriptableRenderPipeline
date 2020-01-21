@@ -46,6 +46,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added the receive fog option in the material UI for ShaderGraphs.
 - Added a public virtual bool in the custom post processes API to specify if a post processes should be executed in the scene view.
 - Added a menu option that checks scene issues with ray tracing. Also removed the previously existing warning at runtime.
+- Added Contrast Adaptive Sharpen (CAS) Upscaling effect.
+- Added APIs to update probe settings at runtime.
+- Added documentation for the rayTracingSupported method in HDRP
+- Added user-selectable format for the post processing passes. 
+- Added support for alpha channel in some post-processing passes (DoF, TAA, Uber).
 
 ### Fixed
 - Sorting, undo, labels, layout in the Lighting Explorer.
@@ -297,10 +302,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed a warning in raytracingshadowfilter.compute
 - Fixed issue with AO breaking with small near plane values.
 - Fixed custom post process Cleanup function not called in some cases.
-- Fixed an issue with light list remaining in a stale state if multiple camera are present and no non-directional lights are in the scene.
 - Fixed shader warning in AO code.
 - Fixed a warning in simpledenoiser.compute
 - Fixed tube and rectangle light culling to use their shape instead of their range as a bounding box.
+- Fixed caused by using gather on a UINT texture in motion blur. 
+- Fix issue with ambient occlusion breaking when dynamic resolution is active.
+- Fixed some possible NaN causes in Depth of Field.
+- Fixed Custom Pass nullref due to the new Profiling Sample API changes
+- Fixed the black/grey screen issue on after post process Custom Passes in non dev builds.
+- Fixed particle lights.
+- Improved behavior of lights and probe going over the HDRP asset limits.
+- Fixed issue triggered when last punctual light is disabled and more than one camera is used.
 
 ### Changed
 - Color buffer pyramid is not allocated anymore if neither refraction nor distortion are enabled
@@ -355,6 +367,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updated the MSAA documentation to specify what features HDRP supports MSAA for and what features it does not.
 - Shader use for Runtime Debug Display are now correctly stripper when doing a release build
 - Now each camera has its own Volume Stack. This allows Volume Parameters to be updated as early as possible and be ready for the whole frame without conflicts between cameras.
+- Disable Async for SSR, SSAO and Contact shadow when aggregated ray tracing frame setting is on.
+- Improved performance when entering play mode without domain reload by a factor of ~25
+- Renamened the camera profiling sample to include the camera name
 
 ## [7.1.1] - 2019-09-05
 
