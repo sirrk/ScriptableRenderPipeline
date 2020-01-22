@@ -379,6 +379,7 @@ Build_{{ project.name }}_OSX_Metal_Player_{{ editor.version }}:
       paths:
         - "**/test-results/**"
 {% endif %}
+{% endif %}
 {% endfor %}
 
 
