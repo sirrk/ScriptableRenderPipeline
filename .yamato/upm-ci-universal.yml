@@ -266,9 +266,9 @@ Build_{{ project.name }}_OSX_OpenGLCore_Player_{{ editor.version }}:
 Build_{{ project.name }}_OSX_Metal_Player_{{ editor.version }}:
   name : Build {{ project.name }} on OSX_Metal_Player on version {{ editor.version }}
   agent:
-    type: {{ platform.type }}
-    image: {{ platform.image }}
-    flavor: {{ platform.flavor }}
+    type: Unity::VM::osx
+    image: buildfarm/mac:stable
+    flavor: m1.mac
 {% if editor.version == 'CUSTOM-REVISION' %}
   variables:
     CUSTOM_REVISION: custom_revision_not_set
