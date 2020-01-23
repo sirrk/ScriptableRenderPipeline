@@ -21,7 +21,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added hability to name LightLayers in HDRenderPipelineAsset
 - Added a range compression factor for Reflection Probe and Planar Reflection Probe to avoid saturation of colors.
 - Added path tracing support for directional, point and spot lights, as well as emission from Lit and Unlit.
-- Added path tracing support for refraction and internal reflections.
 - Added non temporal version of SSAO.
 - Added more detailed ray tracing stats in the debug window
 - Added Disc area light (bake only)
@@ -53,6 +52,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added user-selectable format for the post processing passes.
 - Added support for alpha channel in some post-processing passes (DoF, TAA, Uber).
 - Added warnings in FrameSettings inspector when using DXR and atempting to use Asynchronous Execution.
+- Added path tracing support for refraction and internal reflections.
+- Added support for Thin Refraction Model and Lit's Clear Coat in Path Tracing.
 
 ### Fixed
 - Sorting, undo, labels, layout in the Lighting Explorer.
@@ -401,7 +402,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Setting a material's Refraction Model to Thin does not overwrite the Thickness and Transmission Absorption Distance anymore.
 - Removed Wind textures from runtime as wind is no longer built into the pipeline
 - Expose StartSinglePass() and StopSinglePass() as public interface for XRPass
-- Added support for Thin Refraction Model and Lit's Clear Coat in Path Tracing.
 
 ## [7.1.1] - 2019-09-05
 
