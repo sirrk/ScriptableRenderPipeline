@@ -1,5 +1,0 @@
-{
-    "displayName":"Materials Samples",
-    "description": "Adds Materials Samples to your project. Open the MaterialsSamples scene to see examples of materials based on the lit shader with effects such as subsurface scattering, displacement, anisotropy and more. This scene requires Text Mesh Pro to render text explanations.",
-    "createSeparatePackage": false
-}
