@@ -152,11 +152,14 @@ namespace UnityEngine.Rendering.Universal
             return support;
         }
 
-        internal static readonly int UNITY_STEREO_MATRIX_V = Shader.PropertyToID("unity_StereoMatrixV");
-        internal static readonly int UNITY_STEREO_MATRIX_IV = Shader.PropertyToID("unity_StereoMatrixInvV");
-        internal static readonly int UNITY_STEREO_MATRIX_P = Shader.PropertyToID("unity_StereoMatrixP");
-        internal static readonly int UNITY_STEREO_MATRIX_VP = Shader.PropertyToID("unity_StereoMatrixVP");
-
+        internal static readonly int UNITY_STEREO_MATRIX_V      = Shader.PropertyToID("unity_StereoMatrixV");
+        internal static readonly int UNITY_STEREO_MATRIX_IV     = Shader.PropertyToID("unity_StereoMatrixInvV");
+        internal static readonly int UNITY_STEREO_MATRIX_P      = Shader.PropertyToID("unity_StereoMatrixP");
+        internal static readonly int UNITY_STEREO_MATRIX_IP     = Shader.PropertyToID("unity_StereoMatrixIP");
+        internal static readonly int UNITY_STEREO_MATRIX_VP     = Shader.PropertyToID("unity_StereoMatrixVP");
+        internal static readonly int UNITY_STEREO_MATRIX_IVP    = Shader.PropertyToID("unity_StereoMatrixIVP");
+        internal static readonly int UNITY_STEREO_VECTOR_CAMPOS = Shader.PropertyToID("unity_StereoWorldSpaceCameraPos");
+        
         /// <summary>
         /// Helper function to set all view and projection related matricies
         /// Should be called before draw call and after cmd.SetRenderTarget 
@@ -169,12 +172,19 @@ namespace UnityEngine.Rendering.Universal
         /// <returns>Void</c></returns>
         internal static void SetStereoViewProjectionMatrices(CommandBuffer cmd, Matrix4x4[] viewMatrix, Matrix4x4[] projMatrix, bool setVPOnly)
         {
+            Matrix4x4[] invViewMatrix = new Matrix4x4[2];
+            Matrix4x4[] invProjMatrix = new Matrix4x4[2];
             Matrix4x4[] viewProjMatrix = new Matrix4x4[2];
             Matrix4x4[] invViewProjMatrix = new Matrix4x4[2];
+            Vector4[]   stereoWorldSpaceCameraPos = new Vector4[2];
+
             for (int i = 0; i < 2; i++)
             {
+                invViewMatrix[i] = Matrix4x4.Inverse(viewMatrix[i]);
+                invProjMatrix[i] = Matrix4x4.Inverse(projMatrix[i]);
                 viewProjMatrix[i] = projMatrix[i] * viewMatrix[i];
                 invViewProjMatrix[i] = Matrix4x4.Inverse(viewProjMatrix[i]);
+                stereoWorldSpaceCameraPos[i] = invViewMatrix[i].GetColumn(3);
             }
 
             if (setVPOnly)
@@ -184,11 +194,12 @@ namespace UnityEngine.Rendering.Universal
             else
             {
                 cmd.SetGlobalMatrixArray(UNITY_STEREO_MATRIX_V, viewMatrix);
-                cmd.SetGlobalMatrixArray(UNITY_STEREO_MATRIX_IV, invViewProjMatrix);
+                cmd.SetGlobalMatrixArray(UNITY_STEREO_MATRIX_IV, invViewMatrix);
                 cmd.SetGlobalMatrixArray(UNITY_STEREO_MATRIX_P, projMatrix);
+                cmd.SetGlobalMatrixArray(UNITY_STEREO_MATRIX_IP, invProjMatrix);
                 cmd.SetGlobalMatrixArray(UNITY_STEREO_MATRIX_VP, viewProjMatrix);
-                // XRTODO: handle stereo IVP similar to non-xr path
-                //cmd.SetGlobalMatrix(UNITY_STEREO_MATRIX_IVP, Matrix4x4.Inverse(viewProjMatrix));
+                cmd.SetGlobalMatrixArray(UNITY_STEREO_MATRIX_IVP, invViewProjMatrix);
+                cmd.SetGlobalVectorArray(UNITY_STEREO_VECTOR_CAMPOS, stereoWorldSpaceCameraPos);
             }
         }
 
@@ -196,7 +207,7 @@ namespace UnityEngine.Rendering.Universal
         internal static readonly int UNITY_MATRIX_IV = Shader.PropertyToID("unity_MatrixInvV");
         internal static readonly int UNITY_MATRIX_P = Shader.PropertyToID("glstate_matrix_projection");
         internal static readonly int UNITY_MATRIX_VP = Shader.PropertyToID("unity_MatrixVP");
-        internal static readonly int UNITY_MATRIX_IVP = Shader.PropertyToID("_InvCameraViewProj");
+        internal static readonly int UNITY_MATRIX_IVP = Shader.PropertyToID("unity_MatrixInvVP");
 
         /// <summary>
         /// Helper function to set all view and projection related matricies

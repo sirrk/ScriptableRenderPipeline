@@ -21,17 +21,17 @@
 #endif
 
 #if defined(USING_STEREO_MATRICES)
-#define glstate_matrix_projection unity_StereoMatrixP[unity_StereoEyeIndex]
-#define unity_MatrixV unity_StereoMatrixV[unity_StereoEyeIndex]
-#define unity_MatrixInvV unity_StereoMatrixInvV[unity_StereoEyeIndex]
-#define unity_MatrixVP unity_StereoMatrixVP[unity_StereoEyeIndex]
-#define unity_MatrixInvVP mul(unity_StereoMatrixInvV[unity_StereoEyeIndex], unity_StereoCameraInvProjection[unity_StereoEyeIndex])
+#define glstate_matrix_projection     unity_StereoMatrixP[unity_StereoEyeIndex]
+#define unity_MatrixV                 unity_StereoMatrixV[unity_StereoEyeIndex]
+#define unity_MatrixInvV              unity_StereoMatrixInvV[unity_StereoEyeIndex]
+#define unity_MatrixVP                unity_StereoMatrixVP[unity_StereoEyeIndex]
+#define unity_MatrixInvVP             unity_StereoMatrixIVP[unity_StereoEyeIndex]
 
-#define unity_CameraProjection unity_StereoCameraProjection[unity_StereoEyeIndex]
-#define unity_CameraInvProjection unity_StereoCameraInvProjection[unity_StereoEyeIndex]
-#define unity_WorldToCamera unity_StereoWorldToCamera[unity_StereoEyeIndex]
-#define unity_CameraToWorld unity_StereoCameraToWorld[unity_StereoEyeIndex]
-#define _WorldSpaceCameraPos unity_StereoWorldSpaceCameraPos[unity_StereoEyeIndex]
+#define unity_CameraProjection        unity_StereoMatrixP[unity_StereoEyeIndex]
+#define unity_CameraInvProjection     unity_StereoMatrixIP[unity_StereoEyeIndex]
+#define unity_WorldToCamera           unity_StereoMatrixV[unity_StereoEyeIndex]
+#define unity_CameraToWorld           unity_StereoMatrixInvV[unity_StereoEyeIndex]
+#define _WorldSpaceCameraPos          unity_StereoWorldSpaceCameraPos[unity_StereoEyeIndex]
 #endif
 
 #define UNITY_LIGHTMODEL_AMBIENT (glstate_lightmodel_ambient * 2)
@@ -129,25 +129,14 @@ CBUFFER_END
 #if defined(USING_STEREO_MATRICES)
 CBUFFER_START(UnityStereoViewBuffer)
 float4x4 unity_StereoMatrixP[2];
+float4x4 unity_StereoMatrixIP[2];
 float4x4 unity_StereoMatrixV[2];
 float4x4 unity_StereoMatrixInvV[2];
 float4x4 unity_StereoMatrixVP[2];
-
-float4x4 unity_StereoCameraProjection[2];
-float4x4 unity_StereoCameraInvProjection[2];
-float4x4 unity_StereoWorldToCamera[2];
-float4x4 unity_StereoCameraToWorld[2];
-
-float3 unity_StereoWorldSpaceCameraPos[2];
-float4 unity_StereoScaleOffset[2];
+float4x4 unity_StereoMatrixIVP[2];
+float3   unity_StereoWorldSpaceCameraPos[2];
 CBUFFER_END
 #endif
-
-//#if defined(USING_STEREO_MATRICES) && defined(UNITY_STEREO_MULTIVIEW_ENABLED)
-//CBUFFER_START(UnityStereoEyeIndices)
-//    float4 unity_StereoEyeIndices[2];
-//CBUFFER_END
-//#endif
 
 #if defined(UNITY_STEREO_MULTIVIEW_ENABLED) && defined(SHADER_STAGE_VERTEX)
 // OVR_multiview
@@ -183,7 +172,6 @@ float4x4 unity_MatrixV;
 float4x4 unity_MatrixInvV;
 float4x4 unity_MatrixVP;
 float4x4 unity_MatrixInvVP;
-float4 unity_StereoScaleOffset;
 int unity_StereoEyeIndex;
 #endif
 

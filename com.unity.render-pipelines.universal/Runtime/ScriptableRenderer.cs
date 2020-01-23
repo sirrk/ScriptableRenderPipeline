@@ -255,6 +255,7 @@ namespace UnityEngine.Rendering.Universal
         {
             context.SetupCameraProperties(cameraData.camera);
             UpdateGPUViewProjectionMatricies(cmd, ref cameraData, cameraData.xrPass.renderTargetIsRenderTexture);
+
             context.ExecuteCommandBuffer(cmd);
             cmd.Clear();
         }
