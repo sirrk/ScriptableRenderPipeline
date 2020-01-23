@@ -289,7 +289,7 @@ namespace UnityEngine.Rendering.Universal
                     renderer.Execute(context, ref renderingData);
                 }
             }
-
+            context.ExecuteCommandBuffer(cmd);
             // Render XR mirror view once all xr passes have been completed
             if (cameraData.camera.cameraType == CameraType.Game && requiresBlitToBackbuffer)
             {
@@ -298,7 +298,6 @@ namespace UnityEngine.Rendering.Universal
                 context.ExecuteCommandBuffer(cmd);
             }
 
-            context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);
             context.Submit();
 

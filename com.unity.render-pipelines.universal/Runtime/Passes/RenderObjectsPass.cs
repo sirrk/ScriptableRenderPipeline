@@ -81,80 +81,101 @@ namespace UnityEngine.Experimental.Rendering.Universal
             drawingSettings.overrideMaterialPassIndex = overrideMaterialPassIndex;
 
             ref CameraData cameraData = ref renderingData.cameraData;
-            Camera camera = cameraData.camera;
 
-            // In case of camera stacking we need to take the viewport rect from base camera
-            Rect pixelRect = renderingData.cameraData.pixelRect;
-            float cameraAspect = (float) pixelRect.width / (float) pixelRect.height;
             CommandBuffer cmd = CommandBufferPool.Get(m_ProfilerTag);
             using (new ProfilingScope(cmd, m_ProfilingSampler))
             {
                 context.ExecuteCommandBuffer(cmd);
                 cmd.Clear();
 
-                if (URPCameraMode.isPureURP)
+                bool isRenderToRenderTexture = colorAttachment != cameraData.xrPass.renderTarget || cameraData.xrPass.renderTargetIsRenderTexture;
+                // if contains only 1 view, setup view proj
+                if (!cameraData.xrPass.hasMultiXrView)
                 {
-                    Matrix4x4 viewMatrix = camera.worldToCameraMatrix;
-                    Matrix4x4 projectionMatrix = camera.projectionMatrix;
+                    // XR Pass viewport will handle camera stack too
+                    Rect pixelRect = cameraData.xrPass.GetViewport(0);
+                    float cameraAspect = (float)pixelRect.width / (float)pixelRect.height;
+
+                    Matrix4x4 viewMatrix = cameraData.xrPass.GetViewMatrix(0);
+                    Matrix4x4 projectionMatrix = cameraData.xrPass.GetProjMatrix(0);
                     if (m_CameraSettings.overrideCamera)
                     {
+                        Camera camera = cameraData.camera;
                         projectionMatrix = Matrix4x4.Perspective(m_CameraSettings.cameraFieldOfView, cameraAspect,
                             camera.nearClipPlane, camera.farClipPlane);
 
-                        viewMatrix = camera.worldToCameraMatrix;
                         Vector4 cameraTranslation = viewMatrix.GetColumn(3);
                         viewMatrix.SetColumn(3, cameraTranslation + m_CameraSettings.offset);
                     }
+                    projectionMatrix = GL.GetGPUProjectionMatrix(projectionMatrix, isRenderToRenderTexture);
 
-                    bool isRenderToCameraTarget = colorAttachment == RenderTargetHandle.CameraTarget.id;
-                    bool isCameraTargetIntermediateTexture = cameraData.camera.targetTexture != null || cameraData.camera.cameraType == CameraType.SceneView || cameraData.camera.cameraType == CameraType.Preview;
-                    bool isRenderToTexture = !isRenderToCameraTarget || isCameraTargetIntermediateTexture;
-                    projectionMatrix = GL.GetGPUProjectionMatrix(projectionMatrix, isRenderToTexture);
                     RenderingUtils.SetViewProjectionMatrices(cmd, viewMatrix, projectionMatrix, false);
-                    
-                    context.ExecuteCommandBuffer(cmd);
                 }
+                // else, set up multi view proj to stereo buffer
                 else
                 {
-                    if (m_CameraSettings.overrideCamera)
+                    //XRTODO: compute stereo data while constructing XRPass
+                    Matrix4x4[] stereoProjectionMatrix = new Matrix4x4[2];
+                    Matrix4x4[] stereoViewMatrix = new Matrix4x4[2];
+
+                    for (int i = 0; i < 2; i++)
                     {
-                        Matrix4x4 projectionMatrix = Matrix4x4.Perspective(m_CameraSettings.cameraFieldOfView, cameraAspect,
-                            camera.nearClipPlane, camera.farClipPlane);
+                        // XR Pass viewport will handle camera stack too
+                        Rect pixelRect = cameraData.xrPass.GetViewport(i);
+                        float cameraAspect = (float)pixelRect.width / (float)pixelRect.height;
 
-                        Matrix4x4 viewMatrix = camera.worldToCameraMatrix;
-                        Vector4 cameraTranslation = viewMatrix.GetColumn(3);
-                        viewMatrix.SetColumn(3, cameraTranslation + m_CameraSettings.offset);
-                        cmd.SetViewProjectionMatrices(viewMatrix, projectionMatrix);
+                        Matrix4x4 viewMatrix = cameraData.xrPass.GetViewMatrix(i);
+                        Matrix4x4 projectionMatrix = cameraData.xrPass.GetProjMatrix(i);
+                        if (m_CameraSettings.overrideCamera)
+                        {
+                            Camera camera = cameraData.camera;
+                            projectionMatrix = Matrix4x4.Perspective(m_CameraSettings.cameraFieldOfView, cameraAspect,
+                                camera.nearClipPlane, camera.farClipPlane);
 
-                        context.ExecuteCommandBuffer(cmd);
+                            Vector4 cameraTranslation = viewMatrix.GetColumn(3);
+                            viewMatrix.SetColumn(3, cameraTranslation + m_CameraSettings.offset);
+                        }
+
+                        stereoViewMatrix[i] = viewMatrix;
+                        stereoProjectionMatrix[i] = GL.GetGPUProjectionMatrix(projectionMatrix, isRenderToRenderTexture);
                     }
+                    RenderingUtils.SetStereoViewProjectionMatrices(cmd, stereoViewMatrix, stereoProjectionMatrix, false);
                 }
+                    
+                context.ExecuteCommandBuffer(cmd);
 
                 context.DrawRenderers(renderingData.cullResults, ref drawingSettings, ref m_FilteringSettings,
                     ref m_RenderStateBlock);
 
-                if (URPCameraMode.isPureURP)
+                if (m_CameraSettings.overrideCamera && m_CameraSettings.restoreCamera)
                 {
-                    if (m_CameraSettings.overrideCamera && m_CameraSettings.restoreCamera)
+                    cmd.Clear();
+                    
+                    // if contains only 1 view, setup view proj
+                    if (!cameraData.xrPass.hasMultiXrView)
                     {
-                        cmd.Clear();
+                        Matrix4x4 viewMatrix = cameraData.xrPass.GetViewMatrix(0);
+                        Matrix4x4 projectionMatrix = cameraData.xrPass.GetProjMatrix(0);
+                        RenderingUtils.SetViewProjectionMatrices(cmd, viewMatrix, GL.GetGPUProjectionMatrix(projectionMatrix, isRenderToRenderTexture), false);
+                    }
+                    else
+                    {
+                        //XRTODO: compute stereo data while constructing XRPass
+                        Matrix4x4[] stereoProjectionMatrix = new Matrix4x4[2];
+                        Matrix4x4[] stereoViewMatrix = new Matrix4x4[2];
+                        for (int i = 0; i < 2; i++)
                         {
-                            bool isRenderToCameraTarget = colorAttachment == RenderTargetHandle.CameraTarget.id;
-                            bool isCameraTargetIntermediateTexture = cameraData.camera.targetTexture != null || cameraData.camera.cameraType == CameraType.SceneView || cameraData.camera.cameraType == CameraType.Preview;
-                            bool isRenderToTexture = !isRenderToCameraTarget || isCameraTargetIntermediateTexture;
-                            RenderingUtils.SetViewProjectionMatrices(cmd, cameraData.viewMatrix, GL.GetGPUProjectionMatrix(cameraData.projectionMatrix, isRenderToTexture), false);
+                            Matrix4x4 viewMatrix = cameraData.xrPass.GetViewMatrix(i);
+                            Matrix4x4 projectionMatrix = cameraData.xrPass.GetProjMatrix(i);
+                            stereoViewMatrix[i] = viewMatrix;
+                            stereoProjectionMatrix[i] = GL.GetGPUProjectionMatrix(projectionMatrix, isRenderToRenderTexture);
                         }
+                        RenderingUtils.SetStereoViewProjectionMatrices(cmd, stereoViewMatrix, stereoProjectionMatrix, false);
                     }
-                }
-                else
-                {
-                    if (m_CameraSettings.overrideCamera && m_CameraSettings.restoreCamera)
-                    {
-                        cmd.Clear();
-                        cmd.SetViewProjectionMatrices(cameraData.viewMatrix, cameraData.projectionMatrix);
-                    }
+                    
                 }
             }
+
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);
         }
