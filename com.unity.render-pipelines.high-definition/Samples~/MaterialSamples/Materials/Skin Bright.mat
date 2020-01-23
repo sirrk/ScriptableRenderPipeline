@@ -133,7 +133,7 @@ Material:
     - _DetailNormalScale: 1
     - _DetailSmoothnessScale: 1
     - _DiffusionProfile: 0
-    - _DiffusionProfileHash: 2.7317202
+    - _DiffusionProfileHash: 2.4338708
     - _DisplacementLockObjectScale: 1
     - _DisplacementLockTilingScale: 1
     - _DisplacementMode: 0
@@ -245,8 +245,8 @@ Material:
     - _BaseColor: {r: 0.88, g: 0.68534565, b: 0.57179725, a: 1}
     - _BaseColorMap_MipInfo: {r: 0, g: 0, b: 0, a: 0}
     - _Color: {r: 0.88, g: 0.6853456, b: 0.57179725, a: 1}
-    - _DiffusionProfileAsset: {r: -1.405437e+32, g: 2.0030989e-26, b: 0.00000006313206,
-        a: -4.4045647e-18}
+    - _DiffusionProfileAsset: {r: -4.546388e+34, g: 2.4210141e-26, b: 2.4143518e+10,
+        a: 1.41089195e+17}
     - _DoubleSidedConstants: {r: 1, g: 1, b: -1, a: 0}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
     - _EmissiveColor: {r: 0, g: 0, b: 0, a: 0}
@@ -259,6 +259,7 @@ Material:
     - _UVDetailsMappingMask: {r: 1, g: 0, b: 0, a: 0}
     - _UVMappingMask: {r: 1, g: 0, b: 0, a: 0}
     - _UVMappingMaskEmissive: {r: 1, g: 0, b: 0, a: 0}
+  m_BuildTextureStacks: []
 --- !u!114 &2509280433437203154
 MonoBehaviour:
   m_ObjectHideFlags: 11
