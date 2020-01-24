@@ -348,7 +348,7 @@ Build_{{ project.name }}_OSX_Metal_Player_{{ editor.version }}:
     - scp -i ~/.ssh/id_rsa_macmini -o "StrictHostKeyChecking=no" -r ../ScriptableRenderPipeline/ bokken@$BOKKEN_DEVICE_IP:~/ScriptableRenderPipeline
     - scp -i ~/.ssh/id_rsa_macmini -o "StrictHostKeyChecking=no" ~/.ssh/id_rsa_macmini bokken@$BOKKEN_DEVICE_IP:~/.ssh/id_rsa_macmini
     # Copy across players folder?
-    - scp -i ~/.ssh/id_rsa_macmini -o "StrictHostKeyChecking=no" -r players bokken@$BOKKEN_DEVICE_IP:~/ScriptableRenderPipeline/players
+    - scp -i ~/.ssh/id_rsa_macmini -o "StrictHostKeyChecking=no" -r ../ScriptableRenderPipeline/players bokken@$BOKKEN_DEVICE_IP:~/ScriptableRenderPipeline/players
     {% if editor.version == 'CUSTOM-REVISION' %}
     - ssh -i ~/.ssh/id_rsa_macmini -o "StrictHostKeyChecking=no" bokken@$BOKKEN_DEVICE_IP '/Users/bokken/Library/Python/3.7/bin/unity-downloader-cli {{ editor.cmdposix }} -c editor --wait --published'
     {% else %}
