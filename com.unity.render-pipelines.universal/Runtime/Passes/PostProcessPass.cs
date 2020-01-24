@@ -354,18 +354,22 @@ namespace UnityEngine.Rendering.Universal.Internal
                 cameraTarget = (m_Destination == RenderTargetHandle.CameraTarget) ? cameraTarget : m_Destination.Identifier();
 
 
-
+                bool isRenderToBackBufferTarget = cameraTarget == cameraData.xrPass.renderTarget && !cameraData.xrPass.renderTargetIsRenderTexture;
                 cmd.SetRenderTarget(new RenderTargetIdentifier(cameraTarget, 0, CubemapFace.Unknown, -1),
                                     colorLoadAction, RenderBufferStoreAction.Store, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare);
-                if (m_Destination == RenderTargetHandle.CameraTarget)
-                    cmd.SetViewport(cameraData.xrPass.GetViewport());
 
-                bool isRenderToBackBufferTarget = cameraTarget == cameraData.xrPass.renderTarget;
-                bool yflip = isRenderToBackBufferTarget && !cameraData.xrPass.renderTargetIsRenderTexture;
+
+                // We f-flip if
+                // 1) we are bliting from render texture to back buffer and
+                // 2) renderTexture starts UV at top
+                bool yflip = isRenderToBackBufferTarget && SystemInfo.graphicsUVStartsAtTop;
                 Vector4 scaleBias = yflip ? new Vector4(1, -1, 0, 1) : new Vector4(1, 1, 0, 0);
                 Vector4 scaleBiasRT = new Vector4(1, 1, 0, 0);
                 m_Materials.uberMaterialProperty.SetVector(ShaderConstants._BlitScaleBias, scaleBias);
                 m_Materials.uberMaterialProperty.SetVector(ShaderConstants._BlitScaleBiasRt, scaleBiasRT);
+
+                if (m_Destination == RenderTargetHandle.CameraTarget)
+                    cmd.SetViewport(cameraData.xrPass.GetViewport());
 
                 cmd.DrawProcedural(Matrix4x4.identity, m_Materials.uber, 0, MeshTopology.Quads, 4, 1, m_Materials.uberMaterialProperty);
 
@@ -1106,8 +1110,11 @@ namespace UnityEngine.Rendering.Universal.Internal
             RenderTargetIdentifier cameraTarget = (cameraData.targetTexture != null) ? new RenderTargetIdentifier(cameraData.targetTexture) : cameraData.xrPass.renderTarget;
             cameraTarget = (m_Destination == RenderTargetHandle.CameraTarget) ? cameraTarget : m_Destination.Identifier();
 
-            bool isRenderToBackBufferTarget = cameraTarget == cameraData.xrPass.renderTarget;
-            bool yflip = isRenderToBackBufferTarget && !cameraData.xrPass.renderTargetIsRenderTexture;
+            bool isRenderToBackBufferTarget = cameraTarget == cameraData.xrPass.renderTarget && !cameraData.xrPass.renderTargetIsRenderTexture;
+            // We f-flip if
+            // 1) we are bliting from render texture to back buffer and
+            // 2) renderTexture starts UV at top
+            bool yflip = isRenderToBackBufferTarget && SystemInfo.graphicsUVStartsAtTop;
 
             Vector4 scaleBias = yflip ? new Vector4(1, -1, 0, 1) : new Vector4(1, 1, 0, 0);
             Vector4 scaleBiasRT = new Vector4(1, 1, 0, 0);

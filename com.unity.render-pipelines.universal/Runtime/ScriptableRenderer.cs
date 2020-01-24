@@ -236,9 +236,12 @@ namespace UnityEngine.Rendering.Universal
                 Matrix4x4 projectionMatrix = GL.GetGPUProjectionMatrix(cameraData.xrPass.GetProjMatrix(0), isRenderToTexture);
                 RenderingUtils.SetViewProjectionMatrices(cmd, cameraData.xrPass.GetViewMatrix(0), projectionMatrix, false);
             }
-            // else, set up multi view proj to stereo buffer
+            // else, set up multi view proj to stereo buffer as well as non stereo buffer
             else
             {
+                Matrix4x4 projectionMatrix = GL.GetGPUProjectionMatrix(cameraData.xrPass.GetProjMatrix(0), isRenderToTexture);
+                RenderingUtils.SetViewProjectionMatrices(cmd, cameraData.xrPass.GetViewMatrix(0), projectionMatrix, false);
+
                 //XRTODO: compute stereo data while constructing XRPass
                 Matrix4x4[] stereoProjectionMatrix = new Matrix4x4[2];
                 Matrix4x4[] stereoViewMatrix = new Matrix4x4[2];
@@ -683,7 +686,6 @@ namespace UnityEngine.Rendering.Universal
                     cmd.EnableShaderKeyword("STEREO_INSTANCING_ON");
                     cmd.SetInstanceMultiplier((uint)cameraData.xrPass.viewCount);
                 }
-
                 context.ExecuteCommandBuffer(cmd);
                 cmd.Clear();
             }
@@ -706,9 +708,9 @@ namespace UnityEngine.Rendering.Universal
                 {
                     cmd.DisableShaderKeyword("STEREO_INSTANCING_ON");
                     cmd.SetInstanceMultiplier(1);
-                    context.ExecuteCommandBuffer(cmd);
-                    cmd.Clear();
                 }
+                context.ExecuteCommandBuffer(cmd);
+                cmd.Clear();
             }
         }
 

@@ -31,29 +31,30 @@ namespace UnityEngine.Rendering.Universal
             // Note: Scene view camera always perform depth prepass
             CommandBuffer cmd = CommandBufferPool.Get(m_ProfilerTag);
 
-            // XRTODO:
-            // Replace this with ScriptableRenderer.SetRenderTarget
-            CoreUtils.SetRenderTarget(cmd, BuiltinRenderTextureType.CameraTarget);
-
+            Vector4 scaleBias = new Vector4(1, 1, 0, 0);
+            Vector4 scaleBiasRT = new Vector4(1, 1, 0, 0);
+            cmd.SetGlobalVector(ShaderConstants._BlitScaleBias, scaleBias);
+            cmd.SetGlobalVector(ShaderConstants._BlitScaleBiasRt, scaleBiasRT);
             cmd.SetGlobalTexture("_CameraDepthAttachment", source.Identifier());
             cmd.EnableShaderKeyword(ShaderKeywordStrings.DepthNoMsaa);
             cmd.DisableShaderKeyword(ShaderKeywordStrings.DepthMsaa2);
             cmd.DisableShaderKeyword(ShaderKeywordStrings.DepthMsaa4);
 
-            if (URPCameraMode.isPureURP)
-            {
-                ref Camera camera = ref renderingData.cameraData.camera;
-                Matrix4x4 projMatrix = GL.GetGPUProjectionMatrix(Matrix4x4.identity, true);
-                RenderingUtils.SetViewProjectionMatrices(cmd, Matrix4x4.identity, projMatrix, true);
-                cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, m_CopyDepthMaterial);
-                RenderingUtils.SetViewProjectionMatrices(cmd, camera.worldToCameraMatrix, GL.GetGPUProjectionMatrix(camera.projectionMatrix, true), true);
-            }
-            else
-            {
-                cmd.Blit(source.Identifier(), BuiltinRenderTextureType.CameraTarget, m_CopyDepthMaterial);
-            }
+            ScriptableRenderer.SetRenderTarget(cmd, new RenderTargetIdentifier(BuiltinRenderTextureType.CameraTarget, 0, CubemapFace.Unknown, -1),
+                                              BuiltinRenderTextureType.CameraTarget, clearFlag, clearColor);
+
+            cmd.DrawProcedural(Matrix4x4.identity, m_CopyDepthMaterial, 0, MeshTopology.Quads, 4, 1, null);
+
+            
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);
+        }
+
+        // Precomputed shader ids to save some CPU cycles (mostly affects mobile)
+        static class ShaderConstants
+        {
+            public static readonly int _BlitScaleBias = Shader.PropertyToID("_BlitScaleBias");
+            public static readonly int _BlitScaleBiasRt = Shader.PropertyToID("_BlitScaleBiasRt");
         }
     }
 }
