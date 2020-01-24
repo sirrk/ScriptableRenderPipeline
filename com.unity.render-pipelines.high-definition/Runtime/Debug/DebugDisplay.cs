@@ -25,6 +25,7 @@ namespace UnityEngine.Rendering.HighDefinition
         LightCluster,
         RayTracedGlobalIllumination,
         RecursiveRayTracing,
+        RayTracedSubSurface,
         MaxLightingFullScreenDebug,
 
         // Rendering
