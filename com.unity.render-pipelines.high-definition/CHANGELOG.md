@@ -54,6 +54,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added warnings in FrameSettings inspector when using DXR and atempting to use Asynchronous Execution.
 - Exposed Stencil bits that can be used by the user.
 - Added history rejection based on velocity of intersected objects for directional, point and spot lights.
+- Added an initial implementation of ray traced sub surface scattering
 
 ### Fixed
 - Sorting, undo, labels, layout in the Lighting Explorer.
