@@ -3410,11 +3410,11 @@ MonoBehaviour:
   m_text: 'Skin
 
     This material uses Subsurface Scattering to simulate light''s
-    diffusion inside the material. This is controlled by the Diffusion Profile referenced
-    in the material. You can share a profile accross different materials. At the
-    material level you can control the weight of the effect with the Subsurface Mask
-    and modulate how much light goes through by tweaking the Thickness value or by
-    using a Thickness Map.'
+    diffusion below the surface.The Diffusion Profile referenced in the material
+    controls how the light scatters. You can share a profile across different materials.
+    In the material, you can control the weight of the effect with the Subsurface
+    Mask, and modulate how much light goes through with the Thickness value or the
+    Thickness Map.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3464,7 +3464,7 @@ MonoBehaviour:
   m_enableWordWrapping: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
-  m_firstOverflowCharacterIndex: 211
+  m_firstOverflowCharacterIndex: 200
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_isTextTruncated: 0
@@ -3488,10 +3488,10 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: -0.01088585}
   m_textInfo:
     textComponent: {fileID: 847396472}
-    characterCount: 411
+    characterCount: 399
     spriteCount: 0
-    spaceCount: 65
-    wordCount: 66
+    spaceCount: 61
+    wordCount: 63
     linkCount: 0
     lineCount: 9
     pageCount: 1
@@ -5782,12 +5782,11 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Foliage\nThis material uses the translucency mode in oder to let light
-    go through the leaves. This effect is also controlled using a Diffusion profile
-    which you can use to tint the lighting. \nAt the material level you can modulate
-    how much light goes through by tweaking the Thickness value or by using a Thickness
-    Map.\nThin materials will let more light through whereas thick materials will
-    tend to block the light."
+  m_text: "Foliage\nThis material uses Translucency in oder to let light go through
+    the leaves. This effect is also controlled by a Diffusion profile which allows
+    you to tint the lighting. \nIn the material, you can modulate how much light
+    goes through with the Thickness value or the Thickness Map.\nThin materials will
+    let more light through whereas thick materials will tend to block the light."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -5837,7 +5836,7 @@ MonoBehaviour:
   m_enableWordWrapping: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
-  m_firstOverflowCharacterIndex: 191
+  m_firstOverflowCharacterIndex: 178
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_isTextTruncated: 0
@@ -5861,10 +5860,10 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: -0.01088585}
   m_textInfo:
     textComponent: {fileID: 1264842109}
-    characterCount: 415
+    characterCount: 383
     spriteCount: 0
-    spaceCount: 72
-    wordCount: 72
+    spaceCount: 65
+    wordCount: 65
     linkCount: 0
     lineCount: 10
     pageCount: 1
@@ -7439,7 +7438,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 90, y: 180, z: -0.000015258789}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 2.4, y: 0}
+  m_AnchoredPosition: {x: 2.4, y: 0.05}
   m_SizeDelta: {x: 5, y: 0.2}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &1777199682
