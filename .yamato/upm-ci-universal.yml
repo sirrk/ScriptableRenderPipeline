@@ -345,32 +345,52 @@ Build_{{ project.name }}_OSX_OpenGLCore_Player_{{ editor.version }}:
 {% endfor %}
 {% endfor %}
 
+
 {% elsif platform.name == "Android" %}
 
+BUILD_{{ project.name }}_Android_OpenGLES_{{ editor.version }}:
+  name: Build
+  agent:
+    type: Unity::VM
+    image: {{ platform.image }}
+    flavor: {{ platform.flavor }}
+  commands:
+    - git clone git@github.cds.internal.unity3d.com:unity/utr.git utr
+    - pip install unity-downloader-cli --extra-index-url https://artifactory.eu-cph-1.unityops.net/api/pypi/common-python/simple
+    - unity-downloader-cli {{ editor.cmd }} -p WindowsEditor -c editor -c Android --wait
+    - utr\utr --suite=playmode --platform=Android --testproject=TestProjects\{{ project.folder }} --editor-location=WindowsEditor --artifacts_path=test-results --player-save-path=players --scripting-backend=il2cpp --timeout=1200 --build-only
+  artifacts:
+    logs:
+      paths:
+        - "**/test-results/**"
+    players:
+      paths:
+        - "players/**"
 
-{{ project.name }}_Android_{{ editor.version }}:
-  name: {{ project.name }} on Android on version {{ editor.version }}
+
+{{ project.name }}_Android_OpenGLES_{{ editor.version }}:
+  name: Test {{ project.name }} on Android_OpenGLES on version {{ editor.version }}
   agent:
     type: {{ platform.type }}
     image: {{ platform.image }}
     flavor: {{ platform.flavor }}
+  skip_checkout: true
+  dependencies:
+    - .yamato/upm-ci-universal.yml#Build_{{ project.name }}_Android_OpenGLES_{{ editor.version }}
   commands:
-   - wget http://artifactory-slo.bf.unity3d.com/artifactory/ie-generic-core-automation/tools/android/shield/adbkey.pub -O %USERPROFILE%/.android/adbkey.pub
-   - wget http://artifactory-slo.bf.unity3d.com/artifactory/ie-generic-core-automation/tools/android/shield/adbkey -O %USERPROFILE%/.android/adbkey
-   - pip install unity-downloader-cli --extra-index-url https://artifactory.eu-cph-1.unityops.net/api/pypi/common-python/simple
-   - git clone git@github.cds.internal.unity3d.com:unity/utr.git utr
-   - unity-downloader-cli {{ editor.cmd }} -p WindowsEditor -c editor -c Android --wait
-   - >
+    - git clone git@github.cds.internal.unity3d.com:unity/utr.git utr
+    - pip install unity-downloader-cli --extra-index-url https://artifactory.eu-cph-1.unityops.net/api/pypi/common-python/simple
+    - unity-downloader-cli {{ editor.cmd }} -p WindowsEditor -c --wait
+    - >
       %ANDROID_SDK_ROOT%\platform-tools\adb.exe connect %BOKKEN_DEVICE_IP%
-   - powershell %ANDROID_SDK_ROOT%\platform-tools\adb.exe devices
-   - NetSh Advfirewall set allprofiles state off
-   - utr\utr --suite=playmode --platform=Android --testproject=TestProjects\{{ project.folder }} --editor-location=WindowsEditor --artifacts_path=test-results --scripting-backend=il2cpp --timeout=1200
-   - start %ANDROID_SDK_ROOT%\platform-tools\adb.exe kill-server
+    - powershell %ANDROID_SDK_ROOT%\platform-tools\adb.exe devices
+    - NetSh Advfirewall set allprofiles state off
+    - utr\utr --suite=playmode --platform=Android --editor-location=WindowsEditor --artifacts_path=test-results --player-load-path=players --scripting-backend=il2cpp --timeout=1200 --player-connection-ip=%BOKKEN_DEVICE_IP%
+    - start %ANDROID_SDK_ROOT%\platform-tools\adb.exe kill-server
   artifacts:
     logs:
       paths:
-        - "**test-results/**/*"
-
+        - "**/test-results/**"
 
 {% endif %}
 {% endfor %}
