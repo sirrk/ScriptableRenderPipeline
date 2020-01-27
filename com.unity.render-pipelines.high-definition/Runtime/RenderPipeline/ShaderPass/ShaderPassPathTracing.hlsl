@@ -77,7 +77,8 @@ void ClosestHit(inout RayIntersection rayIntersection : SV_RayPayload, Attribute
     // Build the surfacedata and builtindata
     SurfaceData surfaceData;
     BuiltinData builtinData;
-    GetSurfaceDataFromIntersection(fragInput, -WorldRayDirection(), posInput, currentVertex, rayIntersection.cone, surfaceData, builtinData);
+    bool isVisible;
+    GetSurfaceAndBuiltinData(fragInput, -WorldRayDirection(), posInput, surfaceData, builtinData, currentVertex, rayIntersection.cone, isVisible);
 
     // Check if we want to compute direct and emissive lighting for current depth
     bool computeDirect = currentDepth >= _RaytracingMinRecursion - 1;
@@ -183,7 +184,7 @@ void ClosestHit(inout RayIntersection rayIntersection : SV_RayPayload, Attribute
             nextRayIntersection.cone.spreadAngle = rayIntersection.cone.spreadAngle + roughnessToSpreadAngle(nextRayIntersection.maxRoughness);
 
             // Shoot ray for indirect lighting
-            TraceRay(_RaytracingAccelerationStructure, RAY_FLAG_FORCE_OPAQUE, RAYTRACINGRENDERERFLAG_PATH_TRACING, 0, 1, 0, rayDescriptor, nextRayIntersection);
+            TraceRay(_RaytracingAccelerationStructure, RAY_FLAG_CULL_BACK_FACING_TRIANGLES | RAY_FLAG_FORCE_OPAQUE, RAYTRACINGRENDERERFLAG_PATH_TRACING, 0, 1, 0, rayDescriptor, nextRayIntersection);
 
             if (computeDirect)
             {
@@ -233,7 +234,8 @@ void AnyHit(inout RayIntersection rayIntersection : SV_RayPayload, AttributeData
     // Build the surfacedata and builtindata
     SurfaceData surfaceData;
     BuiltinData builtinData;
-    bool isVisible = GetSurfaceDataFromIntersection(fragInput, -WorldRayDirection(), posInput, currentVertex, rayIntersection.cone, surfaceData, builtinData);
+    bool isVisible;
+    GetSurfaceAndBuiltinData(fragInput, -WorldRayDirection(), posInput, surfaceData, builtinData, currentVertex, rayIntersection.cone, isVisible);
 
     // If this fella should be culled, then we cull it
     if (!isVisible)
