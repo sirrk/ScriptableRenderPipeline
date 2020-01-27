@@ -354,10 +354,18 @@ Build_{{ project.name }}_Android_OpenGLES_{{ editor.version }}:
     type: Unity::VM
     image: {{ platform.image }}
     flavor: {{ platform.flavor }}
+  {% if editor.version == 'CUSTOM-REVISION' %}
+  variables:
+    CUSTOM_REVISION: custom_revision_not_set
+  {% endif %}
   commands:
     - git clone git@github.cds.internal.unity3d.com:unity/utr.git utr
     - pip install unity-downloader-cli --extra-index-url https://artifactory.eu-cph-1.unityops.net/api/pypi/common-python/simple
+    {% if editor.version == 'CUSTOM-REVISION' %}
+    - unity-downloader-cli {{ editor.cmdwin }} -p WindowsEditor -c editor -c Android --wait
+    {% else %}
     - unity-downloader-cli {{ editor.cmd }} -p WindowsEditor -c editor -c Android --wait
+    {% endif %}
     - utr\utr --suite=playmode --platform=Android --testproject=TestProjects\{{ project.folder }} --editor-location=WindowsEditor --artifacts_path=test-results --player-save-path=players --scripting-backend=il2cpp --timeout=1200 --build-only
   artifacts:
     logs:
@@ -377,10 +385,18 @@ Build_{{ project.name }}_Android_OpenGLES_{{ editor.version }}:
   skip_checkout: true
   dependencies:
     - .yamato/upm-ci-universal.yml#Build_{{ project.name }}_Android_OpenGLES_{{ editor.version }}
+  {% if editor.version == 'CUSTOM-REVISION' %}
+  variables:
+    CUSTOM_REVISION: custom_revision_not_set
+  {% endif %}
   commands:
     - git clone git@github.cds.internal.unity3d.com:unity/utr.git utr
     - pip install unity-downloader-cli --extra-index-url https://artifactory.eu-cph-1.unityops.net/api/pypi/common-python/simple
-    - unity-downloader-cli {{ editor.cmd }} -p WindowsEditor -c --wait
+    {% if editor.version == 'CUSTOM-REVISION' %}
+    - unity-downloader-cli {{ editor.cmdwin }} -p WindowsEditor -c editor --wait
+    {% else %}
+    - unity-downloader-cli {{ editor.cmd }} -p WindowsEditor -c editor --wait
+    {% endif %}
     - >
       %ANDROID_SDK_ROOT%\platform-tools\adb.exe connect %BOKKEN_DEVICE_IP%
     - powershell %ANDROID_SDK_ROOT%\platform-tools\adb.exe devices
