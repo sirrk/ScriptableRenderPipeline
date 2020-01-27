@@ -410,6 +410,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Expose StartSinglePass() and StopSinglePass() as public interface for XRPass
 - Replaced the Texture array for 2D cookies (spot, area and directional lights) and for planar reflections by an atlas.
 - Moved the tier defining from the asset to the concerned volume components.
+- Hide the Probes section in the Renderer editos because it was unused.
 
 ## [7.1.1] - 2019-09-05
 
