@@ -59,7 +59,7 @@ namespace UnityEditor.Rendering.HighDefinition
 
             public static GUIContent zWriteEnableText = new GUIContent("Depth Write", "When enabled, transparent objects write to the depth buffer.");
             public static GUIContent transparentZTestText = new GUIContent("Depth Test", "Set the comparison function to use during the Z Testing.");
-            public static GUIContent rayTracingText = new GUIContent("Ray Tracing", "If this option is enabled and recursive rendering is active, the object will be rendered using ray tracing.");
+            public static GUIContent rayTracingText = new GUIContent("Ray Tracing (Preview)", "If this option is enabled and recursive rendering is active, the object will be rendered using ray tracing.");
 
             public static GUIContent transparentSortPriorityText = new GUIContent("Sorting Priority", "Sets the sort priority (from -100 to 100) of transparent meshes using this Material. HDRP uses this value to calculate the sorting order of all transparent meshes on screen.");
             public static GUIContent enableTransparentFogText = new GUIContent("Receive fog", "When enabled, this Material can receive fog.");

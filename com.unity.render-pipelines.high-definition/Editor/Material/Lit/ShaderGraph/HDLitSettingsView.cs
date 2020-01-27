@@ -33,7 +33,7 @@ namespace UnityEditor.Rendering.HighDefinition.Drawing
             PropertySheet ps = new PropertySheet();
 
             int indentLevel = 0;
-            ps.Add(new PropertyRow(CreateLabel("Ray Tracing", indentLevel)), (row) =>
+            ps.Add(new PropertyRow(CreateLabel("Ray Tracing (Preview)", indentLevel)), (row) =>
             {
                 row.Add(new Toggle(), (toggle) =>
                 {
