@@ -409,6 +409,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Removed Wind textures from runtime as wind is no longer built into the pipeline
 - Expose StartSinglePass() and StopSinglePass() as public interface for XRPass
 - Replaced the Texture array for 2D cookies (spot, area and directional lights) and for planar reflections by an atlas.
+- Moved the tier defining from the asset to the concerned volume components.
 - Updated the default scene and default DXR scene and DefaultVolumeProfile.
 
 ## [7.1.1] - 2019-09-05
@@ -562,6 +563,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Spot light shapes are now correctly taken into account when baking
 - Now the static lighting sky will correctly take the default values for non-overridden properties
 - Fixed material albedo affecting the lux meter
+- Extra test in deferred compute shading to avoid shading pixels that were not rendered by the current camera (for camera stacking)
 
 ### Changed
 - Optimization: Reduce the group size of the deferred lighting pass from 16x16 to 8x8
