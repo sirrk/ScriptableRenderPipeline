@@ -6,6 +6,9 @@
   * [The Universal Render Pipeline Asset](universalrp-asset.md)
 
 * [Rendering](rendering-in-universalrp.md)
+* [Lighting](lighting.md)
+  * [Light component reference](light-component)
+  * [The Universal Additional Light Data component](universal-additional-light-data.md)
 * [Cameras](cameras.md)
   * [The UniversalAdditionalCameraData component](universal-additional-camera-data.md)
   * [Render Mode and types of Camera](camera-types-and-render-mode.md)
