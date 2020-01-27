@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Blend Style in the 2DRendererData are now automatically enabled/disabled.
 - When using the 2D Renderer, Sprites will render with a faster rendering path when no lights are present.
 - Particle shaders now receive shadows
-- Drawing order of SRPDefaultUnlit is now same to the legacy render pipline.
+- Drawing order of SRPDefaultUnlit is now the same as the Built-in Render Pipline.
 
 ### Fixed
 - Fixed an issue where linear to sRGB conversion occurred twice on certain Android devices.
