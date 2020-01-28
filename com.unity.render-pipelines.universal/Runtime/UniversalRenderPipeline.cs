@@ -136,7 +136,9 @@ namespace UnityEngine.Rendering.Universal
             if (QualitySettings.antiAliasing != asset.msaaSampleCount)
             {
                 QualitySettings.antiAliasing = asset.msaaSampleCount;
+#if ENABLE_VR && ENABLE_VR_MODULE
                 XR.XRDevice.UpdateEyeTextureMSAASetting();
+#endif
             }
 
             // For compatibility reasons we also match old LightweightPipeline tag.
