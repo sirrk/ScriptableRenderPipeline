@@ -19,7 +19,7 @@ namespace UnityEngine.Rendering.Universal
     /// <seealso cref="ScriptableRendererFeature"/>
     /// <seealso cref="ScriptableRenderPass"/>
     /// </summary>
-    [MovedFrom("UnityEngine.Rendering.LWRP")] public abstract class ScriptableRenderer
+    [MovedFrom("UnityEngine.Rendering.LWRP")] public abstract class ScriptableRenderer : IDisposable
     {
         /// <summary>
         /// Configures the supported features for this renderer. When creating custom renderers
@@ -169,6 +169,16 @@ namespace UnityEngine.Rendering.Universal
             Clear();
         }
 
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+        }
+
         /// <summary>
         /// Configures the camera target.
         /// </summary>
@@ -222,12 +232,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Called when the render pipeline gets destroyed on quit or domain reload.
-        /// </summary>
-        public virtual void Cleanup()
-        {
         }
-
         internal void UpdateGPUViewProjectionMatricies(CommandBuffer cmd, ref CameraData cameraData, bool isRenderToTexture)
         {
             // if contains only 1 view, setup view proj
