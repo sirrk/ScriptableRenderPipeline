@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Particle shaders now receive shadows
 - Blend Style in the 2DRendererData are now automatically enabled/disabled.
 - When using the 2D Renderer, Sprites will render with a faster rendering path when no lights are present.
+- The Scene view now mirrors the Volume Layer Mask set on the Main Camera.
 
 ### Fixed
 - Fixed an issue where linear to sRGB conversion occurred twice on certain Android devices.
@@ -77,6 +78,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed an issue where the 'Depth Texture' drop down was incorrectly disabled in the Camera Inspector. 
 - Fixed RemoveComponent on Camera contextual menu to not remove Camera while a component depend on it.
 - Fixed an issue where the editor would sometimes crash when using additional lights [case 1176131](https://issuetracker.unity3d.com/issues/mac-crash-on-processshadowcasternodevisibilityandcullwithoutumbra-when-same-rp-asset-is-set-in-graphics-and-quality-settings)
+- Fixed an issue where a depth texture was always created when post-processing was enabled, even if no effects made use of it.
 
 ## [7.1.1] - 2019-09-05
 ### Upgrade Guide
