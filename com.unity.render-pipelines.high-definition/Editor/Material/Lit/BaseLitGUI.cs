@@ -104,7 +104,7 @@ namespace UnityEditor.Rendering.HighDefinition
             );
 
             // As we tag both during motion vector pass and Gbuffer pass we need a separate state and we need to use the write mask
-            if(material.HasProperty(kStencilRef))
+            if (material.HasProperty(kStencilRef))
             {
                 material.SetInt(kStencilRef, stencilRef);
                 material.SetInt(kStencilWriteMask, stencilWriteMask);
@@ -119,12 +119,12 @@ namespace UnityEditor.Rendering.HighDefinition
                 material.SetInt(kStencilRefGBuffer, stencilRefGBuffer);
                 material.SetInt(kStencilWriteMaskGBuffer, stencilWriteMaskGBuffer);
             }
-            if(material.HasProperty(kStencilRefDistortionVec))
+            if (material.HasProperty(kStencilRefDistortionVec))
             {
                 material.SetInt(kStencilRefDistortionVec, (int)StencilUsage.DistortionVectors);
                 material.SetInt(kStencilWriteMaskDistortionVec, (int)StencilUsage.DistortionVectors);
             }
-            if(material.HasProperty(kStencilRefMV))
+            if (material.HasProperty(kStencilRefMV))
             {
                 material.SetInt(kStencilRefMV, stencilRefMV);
                 material.SetInt(kStencilWriteMaskMV, stencilWriteMaskMV);
