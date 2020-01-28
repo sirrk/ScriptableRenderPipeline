@@ -231,20 +231,18 @@ namespace UnityEngine.Rendering.HighDefinition
             );
    
             m_ColorFormat = (GraphicsFormat)hdAsset.currentPlatformRenderPipelineSettings.postProcessSettings.bufferFormat;
-            m_EnableAlpha = false;
             m_KeepAlpha = false;
-            if(m_PostProcessEnabled)
-            {
-                // if both rendering and post-processing support an alpha channel, then post-processing will process (or copy) the alpha
-                m_EnableAlpha = hdAsset.currentPlatformRenderPipelineSettings.supportsAlpha && hdAsset.currentPlatformRenderPipelineSettings.postProcessSettings.supportsAlpha;
-            }
-            if(m_EnableAlpha == false)
+
+            // if both rendering and post-processing support an alpha channel, then post-processing will process (or copy) the alpha
+            m_EnableAlpha = hdAsset.currentPlatformRenderPipelineSettings.supportsAlpha && hdAsset.currentPlatformRenderPipelineSettings.postProcessSettings.supportsAlpha;
+
+            if (m_EnableAlpha == false)
             {
                 // if only rendering has an alpha channel (and not post-processing), then we just copy the alpha to the output (but we don't process it).
                 m_KeepAlpha = hdAsset.currentPlatformRenderPipelineSettings.supportsAlpha;
             }
 
-            if(m_KeepAlpha)
+            if (m_KeepAlpha)
             {
                 m_AlphaTexture = RTHandles.Alloc(
                    Vector2.one, slices: TextureXR.slices, dimension: TextureXR.dimension,
@@ -293,7 +291,7 @@ namespace UnityEngine.Rendering.HighDefinition
         {
             m_HDInstance = hdInstance;
             m_PostProcessEnabled = camera.frameSettings.IsEnabled(FrameSettingsField.Postprocess) && CoreUtils.ArePostProcessesEnabled(camera.camera);
-            m_AnimatedMaterialsEnabled = CoreUtils.AreAnimatedMaterialsEnabled(camera.camera);
+            m_AnimatedMaterialsEnabled = camera.animateMaterials;
 
             // Grab physical camera settings or a default instance if it's null (should only happen
             // in rare occasions due to how HDAdditionalCameraData is added to the camera)
@@ -459,8 +457,8 @@ namespace UnityEngine.Rendering.HighDefinition
                             cmd.DispatchCompute(cs, kernel, (camera.actualWidth + 7) / 8, (camera.actualHeight + 7) / 8, camera.viewCount);
 
                             PoolSource(ref source, destination);
-                        }
                     }
+                }
                 }
 
                 if (m_PostProcessEnabled)

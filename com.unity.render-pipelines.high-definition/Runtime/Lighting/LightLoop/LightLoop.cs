@@ -135,30 +135,54 @@ namespace UnityEngine.Rendering.HighDefinition
         public float unused2;
     };
 
+    /// <summary>
+    /// Tile and Cluster Debug Mode.
+    /// </summary>
     public enum TileClusterDebug : int
     {
+        /// <summary>No Tile and Cluster debug.</summary>
         None,
+        /// <summary>Display lighting tiles debug.</summary>
         Tile,
+        /// <summary>Display lighting clusters debug.</summary>
         Cluster,
+        /// <summary>Display material feautre variants.</summary>
         MaterialFeatureVariants
     };
 
+    /// <summary>
+    /// Light Volume Debug Mode.
+    /// </summary>
     public enum LightVolumeDebug : int
     {
+        /// <summary>Display light volumes as a gradient.</summary>
         Gradient,
+        /// <summary>Display light volumes as shapes will color and edges depending on the light type.</summary>
         ColorAndEdge
     };
 
+    /// <summary>
+    /// Tile and Cluster Debug Categories.
+    /// </summary>
     public enum TileClusterCategoryDebug : int
     {
+        /// <summary>Punctual lights.</summary>
         Punctual = 1,
+        /// <summary>Area lights.</summary>
         Area = 2,
+        /// <summary>Area and punctual lights.</summary>
         AreaAndPunctual = 3,
+        /// <summary>Environment lights.</summary>
         Environment = 4,
+        /// <summary>Environment and punctual lights.</summary>
         EnvironmentAndPunctual = 5,
+        /// <summary>Environment and area lights.</summary>
         EnvironmentAndArea = 6,
+        /// <summary>All lights.</summary>
         EnvironmentAndAreaAndPunctual = 7,
+        /// <summary>Decals.</summary>
         Decal = 8,
+        /// <summary>Density Volumes.</summary>
         DensityVolumes = 16
     };
 
@@ -207,10 +231,6 @@ namespace UnityEngine.Rendering.HighDefinition
         #else
         const int k_ThreadGroupOptimalSize = 64;
         #endif
-
-        // Static keyword is required here else we get a "DestroyBuffer can only be called from the main thread"
-        ComputeBuffer m_DirectionalLightDatas = null;
-        public ComputeBuffer directionalLightDatas { get { return m_DirectionalLightDatas; } }
 
         int m_MaxDirectionalLightsOnScreen;
         int m_MaxPunctualLightsOnScreen;
@@ -1462,10 +1482,6 @@ namespace UnityEngine.Rendering.HighDefinition
                 // Bind the next available slot to the light
                 lightData.screenSpaceShadowIndex = screenSpaceChannelSlot;
 
-                // Keep track of the slot and screen space shadow index that was assignel to this light
-                additionalLightData.screenSpaceShadowSlot = lightData.screenSpaceShadowIndex;
-                additionalLightData.screenSpaceShadowIndex = screenSpaceShadowIndex;
-
                 // Keep track of the screen space shadow data
                 m_CurrentScreenSpaceShadowData[screenSpaceShadowIndex].additionalLightData = additionalLightData;
                 m_CurrentScreenSpaceShadowData[screenSpaceShadowIndex].lightDataIndex = m_lightList.lights.Count;
@@ -1480,12 +1496,6 @@ namespace UnityEngine.Rendering.HighDefinition
                     screenSpaceChannelSlot += 2;
                 else
                     screenSpaceChannelSlot++;
-            }
-            else
-            {
-                // Invalidate the references in the additional light data
-                additionalLightData.screenSpaceShadowSlot = -1;
-                additionalLightData.screenSpaceShadowIndex = -1;
             }
 
             lightData.shadowIndex = shadowIndex;
@@ -2129,7 +2139,7 @@ namespace UnityEngine.Rendering.HighDefinition
                 {
                     additionalData.ReserveShadowMap(hdCamera.camera, m_ShadowManager, hdShadowSettings, m_ShadowInitParameters, light.screenRect);
                 }
-                
+
                 // Reserve the cookie resolution in the 2D atlas
                 ReserveCookieAtlasTexture(additionalData, light.light);
 
@@ -2156,7 +2166,7 @@ namespace UnityEngine.Rendering.HighDefinition
             // Now that all the lights have requested a shadow resolution, we can layout them in the atlas
             // And if needed rescale the whole atlas
             m_ShadowManager.LayoutShadowMaps(debugDisplaySettings.data.lightingDebugSettings);
-            
+
             // Using the same pattern than shadowmaps, light have requested space in the atlas for their
             // cookies and now we can layout the atlas (re-insert all entries by order of size) if needed
             m_TextureCaches.lightCookieManager.LayoutIfNeeded();
@@ -2488,7 +2498,7 @@ namespace UnityEngine.Rendering.HighDefinition
 
                 // We must clear the shadow requests before checking if they are any visible light because we would have requests from the last frame executed in the case where we don't see any lights
                 m_ShadowManager.Clear();
-                
+
                 // Because we don't support baking planar reflection probe, we can clear the atlas.
                 // Every visible probe will be blitted again.
                 m_TextureCaches.reflectionPlanarProbeCache.ClearAtlasAllocator();
@@ -3607,6 +3617,8 @@ namespace UnityEngine.Rendering.HighDefinition
                     // TODO: Is it possible to setup this outside the loop ? Can figure out how, get this: Property (specularLightingUAV) at kernel index (21) is not set
                     cmd.SetComputeTextureParam(parameters.deferredComputeShader, kernel, HDShaderIDs.specularLightingUAV, resources.colorBuffers[0]);
                     cmd.SetComputeTextureParam(parameters.deferredComputeShader, kernel, HDShaderIDs.diffuseLightingUAV, resources.colorBuffers[1]);
+
+                    cmd.SetComputeTextureParam(parameters.deferredComputeShader, kernel, HDShaderIDs._StencilTexture, resources.depthStencilBuffer, 0, RenderTextureSubElement.Stencil);
 
                     // always do deferred lighting in blocks of 16x16 (not same as tiled light size)
                     if (parameters.enableFeatureVariants)

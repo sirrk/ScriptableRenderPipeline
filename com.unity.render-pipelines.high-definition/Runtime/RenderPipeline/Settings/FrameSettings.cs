@@ -259,6 +259,7 @@ namespace UnityEngine.Rendering.HighDefinition
                 (uint)FrameSettingsField.ShadowMaps,
                 (uint)FrameSettingsField.ContactShadows,
                 (uint)FrameSettingsField.Shadowmask,
+                (uint)FrameSettingsField.ScreenSpaceShadows,
                 (uint)FrameSettingsField.SSR,
                 (uint)FrameSettingsField.SSAO,
                 (uint)FrameSettingsField.SubsurfaceScattering,
@@ -565,7 +566,7 @@ namespace UnityEngine.Rendering.HighDefinition
             sanitizedFrameSettings.bitDatas[(int)FrameSettingsField.Shadowmask] &= renderPipelineSettings.supportShadowMask && !preview;
             sanitizedFrameSettings.bitDatas[(int)FrameSettingsField.ContactShadows] &= !preview;
             sanitizedFrameSettings.bitDatas[(int)FrameSettingsField.ScreenSpaceShadows] &= renderPipelineSettings.hdShadowInitParams.supportScreenSpaceShadows;
-            bool rayTracingActive = sanitizedFrameSettings.bitDatas[(int)FrameSettingsField.RayTracing] &= HDRenderPipeline.AggreateRayTracingSupport(renderPipelineSettings);
+            bool rayTracingActive = sanitizedFrameSettings.bitDatas[(int)FrameSettingsField.RayTracing] &= HDRenderPipeline.GatherRayTracingSupport(renderPipelineSettings);
 
             //MSAA only supported in forward
             // TODO: The work will be implemented piecemeal to support all passes
